@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">MigStat</string>
+    <string name="not_using_case_number">Not case setup</string>
+
+    <array name="case_status_types">
+        <item>Application received</item>
+        <item>Decision pending</item>
+        <item>A decision has been made</item>
+    </array>
+</resources>
