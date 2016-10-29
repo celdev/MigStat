@@ -4,6 +4,8 @@ import android.content.Context;
 
 class Application implements ApplicationMethod{
 
+
+
     private ApplicationStatus applicationStatus;
     private ApplicationDate applicationDate;
     private ApplicationNumber applicationNumber;

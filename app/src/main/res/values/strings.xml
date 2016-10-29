@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">MigStat</string>
     <string name="not_using_case_number">Not case setup</string>
+    <string name="question1">1</string>
 
     <array name="case_status_types">
         <item>Application received</item>
