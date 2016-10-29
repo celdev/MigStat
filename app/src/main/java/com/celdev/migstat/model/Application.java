@@ -13,6 +13,7 @@ class Application implements ApplicationMethod{
         this.applicationDate = new ApplicationDate(applicationDate);
         this.applicationNumber = new ApplicationNumber(applicationNumber, applicationNumberType);
     }
+    
 
     @Override
     public long getApplicationDate() {
