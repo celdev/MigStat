@@ -1,14 +1,14 @@
 package com.celdev.migstat.model;
 
-public interface ApplicationMethod {
+interface ApplicationMethod {
 
     long getApplicationDate();
 
     ApplicationStatus getApplicationStatus() throws NoApplicationNumberException;
 
-    ApplicationNumber getApplicationNumer() throws NoApplicationNumberException;
+    ApplicationNumber getApplicationNumber() throws NoApplicationNumberException;
 
-    
+
 
 
 }
