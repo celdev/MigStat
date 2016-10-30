@@ -10,9 +10,5 @@ public class ShowStatus extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_status);
-
-        TextView textView = (TextView) findViewById(R.id.textTest);
-        textView.setText(getIntent().getExtras().getString("abc"));
-
     }
 }

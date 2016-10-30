@@ -15,11 +15,5 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        WebView webView = (WebView) findViewById(R.id.webviewtest);
-        webView.getSettings().setJavaScriptEnabled(true);
-        webView.setWebViewClient(new CustomWebView(this));
-
-        webView.loadUrl("http://www.migrationsverket.se/Kontakta-oss/Tid-till-beslut.html");
-
     }
 }

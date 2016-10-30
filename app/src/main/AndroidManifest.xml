@@ -17,7 +17,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ShowStatus"></activity>
+        <activity android:name=".ShowStatus" />
+        <activity android:name=".ApplicationTypeWebViewActivity"></activity>
     </application>
 
 </manifest>
