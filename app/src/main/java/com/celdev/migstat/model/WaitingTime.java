@@ -9,22 +9,38 @@ public class WaitingTime {
 
     private int lowMonth, highMonth;
     private int days;
-    private long updatedAt;
+    private String updatedAtDate;
     private DayOrMonth dayOrMonth;
 
-    public WaitingTime(int lowMonth, int highMonth, long updatedAt) {
+    public WaitingTime(int lowMonth, int highMonth, String updatedAtDate) {
         this.dayOrMonth = DayOrMonth.MONTH;
         this.lowMonth = lowMonth;
         this.highMonth = highMonth;
-        this.updatedAt = updatedAt;
+        this.updatedAtDate = updatedAtDate;
     }
 
-    public WaitingTime(int days, long updatedAt) {
+    public WaitingTime(int days, String updatedAtDate) {
         this.days = days;
         this.dayOrMonth = DayOrMonth.DAY;
-        this.updatedAt = updatedAt;
+        this.updatedAtDate = updatedAtDate;
     }
 
+    public double getAverage() {
+        if (dayOrMonth.equals(DayOrMonth.DAY)) {
+            return days;
+        }
+        return (highMonth + lowMonth) / 2.0;
+    }
 
-
+    @Override
+    public String toString() {
+        return "WaitingTime{" +
+                "lowMonth=" + lowMonth +
+                ", highMonth=" + highMonth +
+                ", days=" + days +
+                ", updatedAtDate='" + updatedAtDate + '\'' +
+                ", dayOrMonth=" + dayOrMonth +
+                ", average= " + getAverage() +
+                '}';
+    }
 }

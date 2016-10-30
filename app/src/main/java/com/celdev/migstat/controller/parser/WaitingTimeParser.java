@@ -10,7 +10,7 @@ import org.jsoup.nodes.Document;
 
 import java.io.IOException;
 
-public abstract class WaitingTimeParser extends AsyncTask<String, Void, WaitingTime> {
+public abstract class WaitingTimeParser extends AsyncTask<String, Void, Object> {
 
     /*  The id the swedish response uses */
     public static final String SWEDISH_ID = "h-Tidtillbeslut";
@@ -39,15 +39,9 @@ public abstract class WaitingTimeParser extends AsyncTask<String, Void, WaitingT
 
     /*  Sends the response back to the registered listener */
     @Override
-    protected void onPostExecute(WaitingTime waitingTime) {
+    protected void onPostExecute(Object waitingTime) {
         asyncTaskResultReceiver.receiveResult(waitingTime);
     }
-
-    /*  parse the english response and return the waiting time */
-    public abstract WaitingTime parseEnglish(Document document);
-
-    /*  parse the swedish response and return the waiting time */
-    public abstract WaitingTime parseSwedish(Document document);
 
 }
 
