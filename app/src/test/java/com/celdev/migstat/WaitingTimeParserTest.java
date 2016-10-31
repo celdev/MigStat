@@ -1,22 +1,13 @@
 package com.celdev.migstat;
 
-import com.celdev.migstat.controller.parser.Parser;
+import com.celdev.migstat.controller.parser.SimpleWaitingTimeParser;
 
 import org.jsoup.Jsoup;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-/**
- * Example local unit test, which will execute on the development machine (host).
- *
- * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
- */
-public class ExampleUnitTest {
-    @Test
-    public void addition_isCorrect() throws Exception {
-        assertEquals(4, 2 + 2);
-    }
+public class WaitingTimeParserTest {
 
     @Test
     public void testSimpleParser() throws Exception {
@@ -29,8 +20,8 @@ public class ExampleUnitTest {
 
         double delta = 0.01;
 
-        assertEquals(14.5d, Parser.parseSimpleEnglish(Jsoup.connect(urls[0]).get()).getAverage(), delta);
-        assertEquals(1.5d, Parser.parseSimpleEnglish(Jsoup.connect(urls[1]).get()).getAverage(), delta);
-        assertEquals(14.5d, Parser.parseSimpleSwedish(Jsoup.connect(urls[2]).get()).getAverage(), delta);
+        assertEquals(14.5d, SimpleWaitingTimeParser.parseSimpleEnglish(Jsoup.connect(urls[0]).get()).getAverage(), delta);
+        assertEquals(1.5d, SimpleWaitingTimeParser.parseSimpleEnglish(Jsoup.connect(urls[1]).get()).getAverage(), delta);
+        assertEquals(14.5d, SimpleWaitingTimeParser.parseSimpleSwedish(Jsoup.connect(urls[2]).get()).getAverage(), delta);
     }
 }

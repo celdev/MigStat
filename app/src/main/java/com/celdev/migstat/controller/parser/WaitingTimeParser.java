@@ -2,7 +2,6 @@ package com.celdev.migstat.controller.parser;
 
 import android.os.AsyncTask;
 
-import com.celdev.migstat.model.WaitingTime;
 import com.celdev.migstat.model.query.Query;
 
 import org.jsoup.Jsoup;
@@ -21,6 +20,10 @@ public abstract class WaitingTimeParser extends AsyncTask<String, Void, Object> 
         this.asyncTaskResultReceiver = asyncTaskResultReceiver;
     }
 
+    /*  Returns the Document-object for the website returned when visiting the
+    *   url sent as a parameter.
+    *   Will throw an IOException if it's unable to connect
+    * */
     public Document getDocumentForURL(String url) throws IOException{
         return Jsoup.connect(url).get();
     }
