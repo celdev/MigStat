@@ -18,12 +18,12 @@ public class SimpleWaitingTimeParser {
     public static final String ENGLISH_AFTER_MONTHS = "months.";
 
 
-    public static WaitingTime parseSimpleEnglish(Document document) throws ParserException{
-        return parseDocumentGetDatesPart(document, ENGLISH_BEFORE_MONTHS, ENGLISH_BEFORE_UPDATED_AT, ENGLISH_AFTER_MONTHS);
+    public static WaitingTime parseSimpleEnglish(String query, Document document) throws ParserException{
+        return parseDocumentGetDatesPart(query, document, ENGLISH_BEFORE_MONTHS, ENGLISH_BEFORE_UPDATED_AT, ENGLISH_AFTER_MONTHS);
     }
 
-    public static WaitingTime parseSimpleSwedish(Document document) throws ParserException{
-        return parseDocumentGetDatesPart(document, SWEDISH_BEFORE_MONTHS, SWEDISH_BEFORE_UPDATED_AT, SWEDISH_AFTER_MONTHS);
+    public static WaitingTime parseSimpleSwedish(String query, Document document) throws ParserException{
+        return parseDocumentGetDatesPart(query, document, SWEDISH_BEFORE_MONTHS, SWEDISH_BEFORE_UPDATED_AT, SWEDISH_AFTER_MONTHS);
     }
 
 
@@ -41,7 +41,7 @@ public class SimpleWaitingTimeParser {
     *   3. extract the months-numbers
     *   4. use these to create a WaitingTime
     * */
-    public static WaitingTime parseDocumentGetDatesPart(Document document, String beforeMonths, String beforeUpdatedAt, String afterMonths) throws ParserException {
+    public static WaitingTime parseDocumentGetDatesPart(String query, Document document, String beforeMonths, String beforeUpdatedAt, String afterMonths) throws ParserException {
         try {
             Element element = document.select(DIV_CLASS_CONTENT).first();
             element.child(0).remove();
@@ -50,7 +50,7 @@ public class SimpleWaitingTimeParser {
             String monthsLine = element.html().replace(beforeMonths, "").replace(afterMonths, "").trim();
             String updatedLine = updatedElement.html().replace(beforeUpdatedAt, "").trim();
             int[] months = extractMonths(monthsLine);
-            return new WaitingTime(months[0], months[1], updatedLine);
+            return new WaitingTime(months[0], months[1], updatedLine, query);
         } catch (NumberFormatException e) {
             throw new ParserException("Error: Couldn't convert parsed string to number");
         } catch (ArrayIndexOutOfBoundsException e) {

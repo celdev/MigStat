@@ -13,14 +13,14 @@ public class MultipleWaitingTimeWrapper {
         private WaitingTime waitingTime;
         private String whatKindOfWaitingTime;
 
-        public WaitingTimeWrapper(String whatKindOfWaitingTime, int lowMonth, int highMonth, String updatedAt) {
+        public WaitingTimeWrapper(String whatKindOfWaitingTime, int lowMonth, int highMonth, String updatedAt, String query) {
             this.whatKindOfWaitingTime = whatKindOfWaitingTime;
-            waitingTime = new WaitingTime(lowMonth, highMonth, updatedAt);
+            waitingTime = new WaitingTime(lowMonth, highMonth, updatedAt, query);
         }
 
-        public WaitingTimeWrapper(String whatKindOfWaitingTime, int days, String updatedAt) {
+        public WaitingTimeWrapper(String whatKindOfWaitingTime, int days, String updatedAt, String query) {
             this.whatKindOfWaitingTime = whatKindOfWaitingTime;
-            waitingTime = new WaitingTime(days, updatedAt);
+            waitingTime = new WaitingTime(days, updatedAt, query);
         }
     }
 }

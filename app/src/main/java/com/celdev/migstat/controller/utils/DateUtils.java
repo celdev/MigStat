@@ -61,4 +61,20 @@ public class DateUtils {
         return month == 0 || month == 2 || month == 4 || month == 6 || month == 7 || month == 9 || month == 11;
     }
 
+    /* returns  1 if the first string is the older date
+     * returns -1 if the second string is the older date
+     * returns  0 if the first == second
+     */
+    public static int compareDateStrings(String first, String second) throws ParserException {
+        if(first.equals(second)) return 0;
+        Calendar firstC = dateStringToCalendar(first);
+        Calendar secondC = dateStringToCalendar(second);
+        return secondC.compareTo(firstC);
+    }
+
+    //returns true if first is an older date than second.
+    public static boolean isNewerDate(String first, String second) throws ParserException {
+        return 1 == compareDateStrings(first, second);
+    }
+
 }

@@ -7,7 +7,7 @@ import com.celdev.migstat.R;
 
 public class ApplicationStatus {
 
-    private final int status;
+    private int status;
     private final String statusString;
 
     ApplicationStatus(Context context, int status) throws IllegalArgumentException{
@@ -37,5 +37,9 @@ public class ApplicationStatus {
 
     public String getStatusString() {
         return statusString;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
     }
 }

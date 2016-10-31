@@ -2,9 +2,9 @@ package com.celdev.migstat.model;
 
 import android.content.Context;
 
-class Application implements ApplicationMethod{
+import java.util.Observable;
 
-
+class Application extends Observable implements ApplicationMethod{
 
     private ApplicationStatus applicationStatus;
     private ApplicationDate applicationDate;
@@ -30,5 +30,14 @@ class Application implements ApplicationMethod{
     @Override
     public ApplicationNumber getApplicationNumber() throws NoApplicationNumberException {
         return applicationNumber;
+    }
+
+    @Override
+    public void newStatusType(StatusType statusType) {
+        if (applicationStatus != null) {
+            applicationStatus.setStatus(statusType.getNumber());
+            setChanged();
+            notifyObservers();
+        }
     }
 }

@@ -11,4 +11,69 @@
     tools:context="com.celdev.migstat.MainActivity">
 
 
+    <Switch
+        android:text="@string/use_case_number"
+        android:checked="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/use_number_switch"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="39dp" />
+
+    <RadioGroup
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="25dp"
+        android:id="@+id/radioGroup"
+        android:layout_below="@+id/use_number_switch"
+        android:layout_centerHorizontal="true">
+
+        <RadioButton
+            android:text="@string/case_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:id="@+id/case_radio_button"
+            tools:targetApi="lollipop" />
+
+        <RadioButton
+            android:text="@string/check_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/check_radio_button" />
+
+
+    </RadioGroup>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/number_field"
+        android:hint="@string/application_number"
+        android:inputType="numberSigned"
+        android:layout_marginTop="17dp"
+        android:layout_below="@+id/radioGroup"
+        android:layout_alignParentStart="true" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/setup_waiting_time_layout"
+        android:layout_below="@+id/number_field"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="60dp">
+
+        <ImageButton
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:id="@+id/waitingtime_launcher"
+            android:contentDescription="@string/waiting_time_launcher_button_text"
+            tools:src="@android:color/holo_green_light" />
+
+
+
+    </RelativeLayout>
+
 </RelativeLayout>

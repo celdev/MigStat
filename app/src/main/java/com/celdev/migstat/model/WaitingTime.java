@@ -12,17 +12,21 @@ public class WaitingTime {
     private String updatedAtDate;
     private DayOrMonth dayOrMonth;
 
-    public WaitingTime(int lowMonth, int highMonth, String updatedAtDate) {
+    private String query;
+
+    public WaitingTime(int lowMonth, int highMonth, String updatedAtDate, String query) {
         this.dayOrMonth = DayOrMonth.MONTH;
         this.lowMonth = lowMonth;
         this.highMonth = highMonth;
         this.updatedAtDate = updatedAtDate;
+        this.query = query;
     }
 
-    public WaitingTime(int days, String updatedAtDate) {
+    public WaitingTime(int days, String updatedAtDate, String query) {
         this.days = days;
         this.dayOrMonth = DayOrMonth.DAY;
         this.updatedAtDate = updatedAtDate;
+        this.query = query;
     }
 
     public double getAverage() {
@@ -30,6 +34,10 @@ public class WaitingTime {
             return days;
         }
         return (highMonth + lowMonth) / 2.0;
+    }
+
+    public String getUpdatedAtDate() {
+        return updatedAtDate;
     }
 
     @Override
@@ -41,6 +49,11 @@ public class WaitingTime {
                 ", updatedAtDate='" + updatedAtDate + '\'' +
                 ", dayOrMonth=" + dayOrMonth +
                 ", average= " + getAverage() +
+                ", query= " + query +
                 '}';
+    }
+
+    public String getQuery() {
+        return query;
     }
 }

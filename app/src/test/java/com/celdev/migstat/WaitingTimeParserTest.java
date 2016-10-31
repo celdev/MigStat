@@ -20,8 +20,8 @@ public class WaitingTimeParserTest {
 
         double delta = 0.01;
 
-        assertEquals(14.5d, SimpleWaitingTimeParser.parseSimpleEnglish(Jsoup.connect(urls[0]).get()).getAverage(), delta);
-        assertEquals(1.5d, SimpleWaitingTimeParser.parseSimpleEnglish(Jsoup.connect(urls[1]).get()).getAverage(), delta);
-        assertEquals(14.5d, SimpleWaitingTimeParser.parseSimpleSwedish(Jsoup.connect(urls[2]).get()).getAverage(), delta);
+        assertEquals(14.5d, SimpleWaitingTimeParser.parseSimpleEnglish(urls[0],Jsoup.connect(urls[0]).get()).getAverage(), delta);
+        assertEquals(1.5d, SimpleWaitingTimeParser.parseSimpleEnglish(urls[1],Jsoup.connect(urls[1]).get()).getAverage(), delta);
+        assertEquals(14.5d, SimpleWaitingTimeParser.parseSimpleSwedish(urls[2],Jsoup.connect(urls[2]).get()).getAverage(), delta);
     }
 }

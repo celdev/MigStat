@@ -8,6 +8,7 @@ interface ApplicationMethod {
 
     ApplicationNumber getApplicationNumber() throws NoApplicationNumberException;
 
+    void newStatusType(StatusType statusType);
 
 
 

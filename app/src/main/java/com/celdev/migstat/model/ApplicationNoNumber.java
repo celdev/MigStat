@@ -28,4 +28,9 @@ class ApplicationNoNumber implements ApplicationMethod {
     public ApplicationNumber getApplicationNumber() throws NoApplicationNumberException {
         throw new NoApplicationNumberException();
     }
+
+    @Override
+    public void newStatusType(StatusType statusType) {
+        //do nothing this method shouldn't be reachable.
+    }
 }

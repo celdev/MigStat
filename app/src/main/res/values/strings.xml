@@ -2,10 +2,16 @@
     <string name="app_name">MigStat</string>
     <string name="not_using_case_number">Not case setup</string>
     <string name="question1">1</string>
+    <string name="use_case_number">Use Application Number</string>
+    <string name="application_number">Application number</string>
 
     <array name="case_status_types">
         <item>Application received</item>
         <item>Decision pending</item>
         <item>A decision has been made</item>
     </array>
+
+    <string name="case_number">Case Number</string>
+    <string name="check_number">Check Number</string>
+    <string name="waiting_time_launcher_button_text">Setup Waiting Time</string>
 </resources>
