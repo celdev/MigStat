@@ -67,6 +67,21 @@ public class DataStorage {
         }
     }
 
+    public boolean saveWaitingTimeQuery(Context context, String query) {
+        SharedPreferences preferences = getSharedPreference(context);
+        try {
+            preferences.edit().
+                    putBoolean(APPLICATION_TYPE_QUERY_MODE, false).
+                    putString(APPLICATION_TYPE_QUERY, query).apply();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public boolean saveApplicationNotUseApplicationNumber(Context context,long applicationDate) {
+        return saveApplication(context, new Application(applicationDate));
+    }
 
     public boolean saveWaitingTimeDataStoragePacket(Context context, WaitingTime waitingTime) {
         if (waitingTime == null) {
@@ -133,19 +148,23 @@ public class DataStorage {
         boolean returnValue = true;
         try {
             SharedPreferences preferences = getSharedPreference(context);
-            if (preferences.contains(PREFERENCE_KEY + VERSION_KEY)) {
-                long version = preferences.getLong(PREFERENCE_KEY + VERSION_KEY, -1);
+            if (preferences.contains(VERSION_KEY)) {
+                long version = preferences.getLong(VERSION_KEY, -1);
                 returnValue = version < APP_VERSION;
             }
-            saveVersion();
+            saveVersion(context);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return returnValue;
     }
 
-    private void saveVersion() {
+    private void saveVersion(Context context) {
+        getSharedPreference(context).edit().putLong(VERSION_KEY, APP_VERSION).apply();
+    }
 
+    public void deleteAllData(Context context) {
+        getSharedPreference(context).edit().clear().apply();
     }
 
 }

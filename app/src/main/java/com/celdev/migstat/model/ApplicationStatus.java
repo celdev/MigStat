@@ -42,4 +42,12 @@ public class ApplicationStatus {
     public void setStatus(int status) {
         this.status = status;
     }
+
+    @Override
+    public String toString() {
+        return "ApplicationStatus{" +
+                "status=" + StatusType.statusNumberToStatusType(status) +
+                ", statusString='" + statusString + '\'' +
+                '}';
+    }
 }

@@ -17,4 +17,12 @@ public class ApplicationNumber {
     public ApplicationNumberType getApplicationNumberType() {
         return applicationNumberType;
     }
+
+    @Override
+    public String toString() {
+        return "ApplicationNumber{" +
+                "applicationNumber=" + applicationNumber +
+                ", applicationNumberType=" + applicationNumberType +
+                '}';
+    }
 }

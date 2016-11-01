@@ -11,4 +11,11 @@ public class ApplicationDate {
     public long getApplicationDate() {
         return applicationDate;
     }
+
+    @Override
+    public String toString() {
+        return "ApplicationDate{" +
+                "applicationDate=" + applicationDate +
+                '}';
+    }
 }

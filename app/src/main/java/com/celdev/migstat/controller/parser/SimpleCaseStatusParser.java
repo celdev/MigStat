@@ -1,10 +1,16 @@
 package com.celdev.migstat.controller.parser;
 
+import android.os.AsyncTask;
+
 import com.celdev.migstat.controller.utils.DateUtils;
+import com.celdev.migstat.model.Application;
 import com.celdev.migstat.model.ApplicationDate;
+import com.celdev.migstat.model.ApplicationNumber;
+import com.celdev.migstat.model.ApplicationStatus;
 import com.celdev.migstat.model.ParserException;
 import com.celdev.migstat.model.StatusType;
 
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
@@ -52,8 +58,58 @@ public class SimpleCaseStatusParser {
         return new ApplicationDate(DateUtils.dateStringToCalendar(elements.get(0).html().trim()).getTimeInMillis());
     }
 
+    public static class Worker extends AsyncTask<ApplicationNumber, Void, StatusAndDate> {
+
+        private AsyncTaskResultReceiver asyncTaskResultReceiver;
+
+        public Worker(AsyncTaskResultReceiver asyncTaskResultReceiver) {
+            this.asyncTaskResultReceiver = asyncTaskResultReceiver;
+        }
+
+        @Override
+        protected StatusAndDate doInBackground(ApplicationNumber... applicationNumbers) {
+            int applicationNumber = applicationNumbers[0].getApplicationNumber();
+            int applicationNumberType = applicationNumbers[0].getApplicationNumberType().getMigrationsverketQueryNumber();
+            try {
+                Document document = Jsoup.connect(MIGRATIONSVERKET_MY_PAGE_URL + applicationNumberType + "&q=" + applicationNumber).get();
+                StatusType applicationStatus = extractStatus(document);
+                ApplicationDate applicationDate = extractApplicationDate(document);
+                return new StatusAndDate(applicationStatus, applicationDate, applicationNumbers[0]);
+            } catch (Exception e) {
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(StatusAndDate statusAndDate) {
+            asyncTaskResultReceiver.receiveResult(statusAndDate);
+        }
+    }
 
 
+    public static class StatusAndDate{
+        private StatusType statusType;
+        private ApplicationDate applicationDate;
+        private ApplicationNumber applicationNumber;
+
+        public StatusAndDate(StatusType statusType, ApplicationDate applicationDate, ApplicationNumber applicationNumber) {
+            this.statusType = statusType;
+            this.applicationDate = applicationDate;
+            this.applicationNumber = applicationNumber;
+        }
+
+        public ApplicationNumber getApplicationNumber() {
+            return applicationNumber;
+        }
+
+        public StatusType getStatusType() {
+            return statusType;
+        }
+
+        public ApplicationDate getApplicationDate() {
+            return applicationDate;
+        }
+    }
 
 
 }

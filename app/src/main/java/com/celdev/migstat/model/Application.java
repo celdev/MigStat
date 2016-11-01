@@ -67,4 +67,15 @@ public class Application{
             //ignore
         }
     }
+
+    @Override
+    public String toString() {
+        return "Application{" +
+                "applicationStatus=" + applicationStatus +
+                ", applicationDate=" + applicationDate +
+                ", applicationNumber=" + applicationNumber +
+                ", waitingTime=" + waitingTime +
+                ", hasApplicationNumber=" + hasApplicationNumber +
+                '}';
+    }
 }

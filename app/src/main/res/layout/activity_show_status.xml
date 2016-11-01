@@ -13,7 +13,21 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/textTest"
+        android:text="avg months"
+        android:id="@+id/avg_months"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="applicationnumber"
+        android:id="@+id/application_number"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="query type"
+        android:id="@+id/query_type"
         />
 
 </RelativeLayout>
