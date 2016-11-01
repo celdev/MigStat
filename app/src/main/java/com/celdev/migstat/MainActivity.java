@@ -10,6 +10,8 @@ public class MainActivity extends AppCompatActivity {
 
     public static String LOG_KEY = "migstat";
 
+    public static final String APPLICATION_KEY = "com.celdev.migstat";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

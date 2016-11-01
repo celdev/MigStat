@@ -66,7 +66,6 @@ public class DateUtils {
      * returns  0 if the first == second
      */
     public static int compareDateStrings(String first, String second) throws ParserException {
-        if(first.equals(second)) return 0;
         Calendar firstC = dateStringToCalendar(first);
         Calendar secondC = dateStringToCalendar(second);
         return secondC.compareTo(firstC);

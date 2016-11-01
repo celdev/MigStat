@@ -14,4 +14,13 @@ public enum ApplicationNumberType {
     public int getMigrationsverketQueryNumber() {
         return migrationsverketQueryNumber;
     }
+
+    public static ApplicationNumberType numberToNumberType(int i) {
+        if (i == 1) {
+            return CASE_NUMBER;
+        } else if (i == 2) {
+            return CHECK_NUMBER;
+        }
+        throw new IllegalArgumentException();
+    }
 }

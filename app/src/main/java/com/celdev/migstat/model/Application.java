@@ -2,42 +2,69 @@ package com.celdev.migstat.model;
 
 import android.content.Context;
 
-import java.util.Observable;
 
-class Application extends Observable implements ApplicationMethod{
+public class Application{
 
     private ApplicationStatus applicationStatus;
     private ApplicationDate applicationDate;
     private ApplicationNumber applicationNumber;
+    private WaitingTime waitingTime;
 
-    Application(Context context, StatusType status, long applicationDate, Integer applicationNumber, ApplicationNumberType applicationNumberType) {
+    private boolean hasApplicationNumber;
+
+    public Application(Context context, StatusType status, long applicationDate, Integer applicationNumber, ApplicationNumberType applicationNumberType) {
         this.applicationStatus = new ApplicationStatus(context, status.getNumber());
         this.applicationDate = new ApplicationDate(applicationDate);
         this.applicationNumber = new ApplicationNumber(applicationNumber, applicationNumberType);
+        hasApplicationNumber = true;
     }
 
+    public Application(long applicationDate) {
+        this.applicationDate = new ApplicationDate(applicationDate);
+        hasApplicationNumber = false;
+    }
 
-    @Override
+    public boolean isHasApplicationNumber() {
+        return hasApplicationNumber;
+    }
+
+    public WaitingTime getWaitingTime() {
+        return waitingTime;
+    }
+
+    public boolean setWaitingTimeReturnIsNewer(WaitingTime waitingTime) {
+        boolean isNewerWaitingTime = false;
+        if (this.waitingTime != null) {
+            int newer = WaitingTime.WaitingTimeUpdatedDateComparator.compare(this.waitingTime, waitingTime);
+            isNewerWaitingTime = newer == -1;
+        }
+        this.waitingTime = waitingTime;
+        return isNewerWaitingTime;
+    }
+
     public long getApplicationDate() {
         return applicationDate.getApplicationDate();
     }
 
-    @Override
     public ApplicationStatus getApplicationStatus() throws NoApplicationNumberException {
+        if (applicationStatus == null) {
+            throw new NoApplicationNumberException();
+        }
         return applicationStatus;
     }
 
-    @Override
     public ApplicationNumber getApplicationNumber() throws NoApplicationNumberException {
+        if (applicationNumber == null) {
+            throw new NoApplicationNumberException();
+        }
         return applicationNumber;
     }
 
-    @Override
     public void newStatusType(StatusType statusType) {
-        if (applicationStatus != null) {
-            applicationStatus.setStatus(statusType.getNumber());
-            setChanged();
-            notifyObservers();
+        try {
+            getApplicationStatus().setStatus(statusType.getNumber());
+        } catch (NoApplicationNumberException e) {
+            //ignore
         }
     }
 }

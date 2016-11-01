@@ -2,6 +2,7 @@ package com.celdev.migstat;
 
 import com.celdev.migstat.controller.utils.DateUtils;
 import com.celdev.migstat.model.ParserException;
+import com.celdev.migstat.model.WaitingTime;
 
 import org.junit.Test;
 
@@ -38,6 +39,10 @@ public class DateUtilTests {
         assertEquals(0, DateUtils.compareDateStrings("2011-01-1","2011-1-01"));
 
         assertEquals(true, DateUtils.isNewerDate("2016-01-01", "2016-01-02"));
+
+        WaitingTime old = new WaitingTime(13, 14, "2016-01-01", "test");
+        WaitingTime newer = new WaitingTime(13, 14, "2016-01-02", "test");
+        assertEquals(-1, WaitingTime.WaitingTimeUpdatedDateComparator.compare(old, newer));
     }
 
     private Object returnNullIfException(String first, String second) {

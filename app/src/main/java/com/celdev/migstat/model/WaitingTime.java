@@ -1,16 +1,29 @@
 package com.celdev.migstat.model;
 
+import com.celdev.migstat.controller.utils.DateUtils;
+
+import java.util.Comparator;
+
 public class WaitingTime {
 
-    private enum DayOrMonth{
-        DAY,
-        MONTH
+    public enum DayOrMonth{
+        DAY(true),
+        MONTH(false);
+
+        DayOrMonth(boolean day) {
+        }
+    }
+
+    public static DayOrMonth isDayMode(boolean mode) {
+        return mode ? DayOrMonth.DAY : DayOrMonth.MONTH;
     }
 
     private int lowMonth, highMonth;
     private int days;
     private String updatedAtDate;
     private DayOrMonth dayOrMonth;
+    private int customMonths;
+    private boolean useCustomMonths;
 
     private String query;
 
@@ -22,6 +35,23 @@ public class WaitingTime {
         this.query = query;
     }
 
+    public void setUseCustomMonthsMode(int customMonths) {
+        this.customMonths = customMonths;
+        this.useCustomMonths = true;
+    }
+
+    public boolean isUseCustomMonths() {
+        return useCustomMonths;
+    }
+
+    public int getCustomMonths() {
+        return customMonths;
+    }
+
+    public void disableCustomMonthsMode() {
+        this.useCustomMonths = false;
+    }
+
     public WaitingTime(int days, String updatedAtDate, String query) {
         this.days = days;
         this.dayOrMonth = DayOrMonth.DAY;
@@ -30,6 +60,9 @@ public class WaitingTime {
     }
 
     public double getAverage() {
+        if (useCustomMonths) {
+            return customMonths;
+        }
         if (dayOrMonth.equals(DayOrMonth.DAY)) {
             return days;
         }
@@ -39,6 +72,17 @@ public class WaitingTime {
     public String getUpdatedAtDate() {
         return updatedAtDate;
     }
+
+    public static Comparator<WaitingTime> WaitingTimeUpdatedDateComparator = new Comparator<WaitingTime>() {
+        @Override
+        public int compare(WaitingTime waitingTime, WaitingTime t1) {
+            try {
+                return DateUtils.compareDateStrings(t1.getUpdatedAtDate(), waitingTime.getUpdatedAtDate());
+            } catch (ParserException e) {
+                return 0;
+            }
+        }
+    };
 
     @Override
     public String toString() {
