@@ -2,4 +2,18 @@
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="radio_button_margin">22dp</dimen>
+    <dimen name="mid_text">28sp</dimen>
+
+    <dimen name="large_waiting_time_button_width">160dp</dimen>
+    <dimen name="large_waiting_time_button_height">120dp</dimen>
+
+    <dimen name="large_waiting_time_button_width_swe">130dp</dimen>
+    <dimen name="large_waiting_time_button_height_swe">120dp</dimen>
+
+    <dimen name="image_button_edge_margin">24dp</dimen>
+    <dimen name="flag_margin">12dp</dimen>
+    <dimen name="mid_text_size">24sp</dimen>
+    <dimen name="sm_text_size">18sp</dimen>
+    <dimen name="layout_spacing">22dp</dimen>
 </resources>

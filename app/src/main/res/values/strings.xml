@@ -10,8 +10,23 @@
         <item>Decision pending</item>
         <item>A decision has been made</item>
     </array>
+    <string name="check_case_button">OK</string>
 
     <string name="case_number">Case Number</string>
     <string name="check_number">Check Number</string>
     <string name="waiting_time_launcher_button_text">Setup Waiting Time</string>
+    <string name="no_number_info_dialog">
+        Your application number is only stored on your device and is only used to query
+        the Swedish Migration Agency\'s website to get the status of your application.
+    </string>
+    <string name="ok">OK</string>
+    <string name="not_setup">Setup application</string>
+    <string name="set_date">Set Application Date</string>
+    <string name="set_your_application_date">Set date of application</string>
+    <string name="date_of_application_placeholder">%1$02d-%2$02d-%3$02d</string>
+    <string name="error_parsing_case">Error: could not find case</string>
+    <string name="loading_application_information">Downloading application information</string>
+    <string name="setup_waiting_time">Setup waiting time</string>
+    <string name="select_language">Select language</string>
+    <string name="loading_website">Loading Questions</string>
 </resources>

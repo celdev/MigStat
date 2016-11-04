@@ -131,12 +131,19 @@ public class DataStorage {
         return true;
     }
 
-    public WaitingTimeDataStoragePacket loadWaitingTime(Context context) {
+    public WaitingTimeDataStoragePacket loadWaitingTime(Context context) throws NoWaitingTimeException{
         SharedPreferences preferences = getSharedPreference(context);
         String applicationTypeQuery = preferences.getString(APPLICATION_TYPE_QUERY, "");
         int applicationTypeCustomMonths = preferences.getInt(APPLICATION_TYPE_QUERY_CUSTOM_MONTHS, 0);
         boolean applicationTypeCustomMonthsUseCustomMode = preferences.getBoolean(APPLICATION_TYPE_QUERY_MODE, false);
+        if (isInvalidWaitingTime(applicationTypeQuery,applicationTypeCustomMonths,applicationTypeCustomMonthsUseCustomMode)) {
+            throw new NoWaitingTimeException();
+        }
         return new WaitingTimeDataStoragePacket(applicationTypeQuery, applicationTypeCustomMonthsUseCustomMode, applicationTypeCustomMonths);
+    }
+
+    private boolean isInvalidWaitingTime(String query, int customMonth, boolean useCustomMonth) {
+        return (query.isEmpty() && !useCustomMonth) || (customMonth == 0 && useCustomMonth);
     }
 
 
@@ -165,6 +172,14 @@ public class DataStorage {
 
     public void deleteAllData(Context context) {
         getSharedPreference(context).edit().clear().apply();
+    }
+
+    public void DEBUG_deleteWaitingTime(Context context) {
+        SharedPreferences preferences = getSharedPreference(context);
+        preferences.edit().
+                remove(APPLICATION_TYPE_QUERY_MODE).
+                remove(APPLICATION_TYPE_QUERY_CUSTOM_MONTHS).
+                remove(APPLICATION_TYPE_QUERY).apply();
     }
 
 }

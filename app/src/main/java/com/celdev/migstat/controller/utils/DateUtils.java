@@ -24,6 +24,12 @@ public class DateUtils {
         throw new ParserException("Invalid date");
     }
 
+    public static Calendar dateToCalendar(int year, int month, int dayOfMonth) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(year, month, dayOfMonth, 0, 0, 0);
+        return calendar;
+    }
+
     /*  returns true if the date is valid
     *   month is zero-based so January = 0... December = 11
     * */

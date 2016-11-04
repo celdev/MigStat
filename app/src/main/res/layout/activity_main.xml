@@ -10,78 +10,179 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.celdev.migstat.MainActivity">
 
-
-    <Switch
-        android:text="@string/use_case_number"
-        android:checked="true"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/use_number_switch"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginTop="39dp" />
-
-    <RadioGroup
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="25dp"
-        android:id="@+id/radioGroup"
-        android:layout_below="@+id/use_number_switch"
-        android:layout_centerHorizontal="true">
-
-        <RadioButton
-            android:text="@string/case_number"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:checked="true"
-            android:id="@+id/case_radio_button"
-            tools:targetApi="lollipop" />
-
-        <RadioButton
-            android:text="@string/check_number"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/check_radio_button" />
-
-
-    </RadioGroup>
-
-    <EditText
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/number_field"
-        android:hint="@string/application_number"
-        android:inputType="numberSigned"
-        android:layout_marginTop="17dp"
-        android:layout_below="@+id/radioGroup"
-        android:layout_alignParentStart="true" />
+        android:id="@+id/top_layout">
+
+        <Switch
+            android:text="@string/use_case_number"
+            android:checked="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/use_number_switch"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="39dp" />
+
+        <ViewSwitcher
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/replaceable_application_number_view"
+            android:layout_below="@+id/use_number_switch">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/use_number_view">
+                <RadioGroup
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="25dp"
+                    android:id="@+id/case_or_check_group"
+                    android:layout_centerHorizontal="true"
+                    >
+
+                    <RadioButton
+                        android:text="@string/case_number"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        android:layout_marginEnd="@dimen/radio_button_margin"
+                        android:id="@+id/case_radio_button" />
+
+                    <RadioButton
+                        android:text="@string/check_number"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/check_radio_button" />
+                </RadioGroup>
+
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/number_field"
+                    android:hint="@string/application_number"
+                    android:inputType="numberSigned"
+                    android:layout_below="@+id/case_or_check_group"
+                    />
+
+
+                <Button
+                    android:text="@string/check_case_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/number_field"
+                    android:id="@+id/check_status_button"
+                    android:layout_alignParentEnd="true"
+                    />
+
+
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/no_number_view">
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/set_date"
+                    android:id="@+id/set_application_date_button"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/set_application_date_text"
+                    android:gravity="center"
+                    android:textSize="@dimen/mid_text"
+                    android:layout_below="@id/set_application_date_button"
+                    android:text="@string/set_your_application_date"/>
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/after_set_date_button"
+                    android:layout_below="@+id/set_application_date_text"
+                    android:layout_alignParentEnd="true"
+                    android:enabled="false"
+                    android:text="@string/ok"
+                    />
+
+            </RelativeLayout>
+
+
+
+        </ViewSwitcher>
+
+    </RelativeLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/setup_waiting_time_layout"
-        android:layout_below="@+id/number_field"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="60dp">
-
-        <ImageButton
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:id="@+id/waitingtime_launcher"
-            android:contentDescription="@string/waiting_time_launcher_button_text"
-            tools:src="@android:color/holo_green_light" />
+        android:id="@+id/bottom_layout"
+        android:layout_below="@+id/top_layout"
+        android:layout_marginTop="@dimen/layout_spacing">
 
 
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/image_button_edge_margin"
+            android:layout_marginStart="@dimen/image_button_edge_margin"
+            android:id="@+id/setup_waiting_time_layout"
+            >
+
+            <TextView
+                android:text="@string/setup_waiting_time"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:textSize="@dimen/mid_text_size"
+                android:gravity="center"
+                android:id="@+id/text_setup_waiting_time_type_big" />
+
+            <TextView
+                android:text="@string/select_language"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/text_setup_waiting_time_type_big"
+                android:textSize="@dimen/sm_text_size"
+                android:gravity="center"
+                android:id="@+id/text_setup_waiting_time_type" />
+
+            <ImageButton
+                android:layout_width="@dimen/large_waiting_time_button_width"
+                android:layout_height="@dimen/large_waiting_time_button_height"
+                android:id="@+id/waitingtime_launcher_eng"
+                android:contentDescription="@string/waiting_time_launcher_button_text"
+                android:src="@drawable/ic_flag_of_the_united_kingdom"
+                android:layout_below="@+id/text_setup_waiting_time_type"
+                android:scaleType="fitCenter"
+                android:background="@color/transparent"
+                tools:src="@drawable/ic_flag_of_the_united_kingdom" />
+
+            <ImageButton
+                android:layout_width="@dimen/large_waiting_time_button_width_swe"
+                android:layout_height="@dimen/large_waiting_time_button_height_swe"
+                android:scaleType="fitCenter"
+                android:id="@+id/waitingtime_launcher_swe"
+                android:background="@color/transparent"
+                android:layout_below="@+id/text_setup_waiting_time_type"
+                android:contentDescription="@string/waiting_time_launcher_button_text"
+                android:src="@drawable/ic_flag_of_sweden"
+                tools:src="@drawable/ic_flag_of_sweden"
+                android:layout_alignParentEnd="true" />
+
+
+
+        </RelativeLayout>
 
     </RelativeLayout>
 
-    <Button
-        android:text="Button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/check_status_button"
-        android:layout_below="@+id/number_field"
-        android:layout_centerHorizontal="true" />
+
+
 
 </RelativeLayout>

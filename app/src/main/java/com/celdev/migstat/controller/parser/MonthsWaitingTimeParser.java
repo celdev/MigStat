@@ -1,5 +1,6 @@
 package com.celdev.migstat.controller.parser;
 
+import com.celdev.migstat.model.ParserException;
 import com.celdev.migstat.model.WaitingTime;
 import com.celdev.migstat.model.query.Query;
 
@@ -20,11 +21,13 @@ public class MonthsWaitingTimeParser extends WaitingTimeParser{
             Query.SwedishOrEnglishQuery swedishOrEnglishQuery = swedishOrEnglishQuery(document);
             WaitingTime waitingTime;
             if (swedishOrEnglishQuery.equals(Query.SwedishOrEnglishQuery.SWEDISH)) {
-
+                waitingTime = SimpleWaitingTimeParser.parseSimpleSwedish(strings[0], document);
             } else {
+                waitingTime = SimpleWaitingTimeParser.parseSimpleEnglish(strings[0], document);
             }
-            return null;
-        } catch (IOException e) {
+            return waitingTime;
+        } catch (IOException | ParserException e) {
+            e.printStackTrace();
             return null;
         }
     }
