@@ -174,7 +174,7 @@ public class DataStorage {
         getSharedPreference(context).edit().clear().apply();
     }
 
-    public void DEBUG_deleteWaitingTime(Context context) {
+    public void deleteWaitingTime(Context context) {
         SharedPreferences preferences = getSharedPreference(context);
         preferences.edit().
                 remove(APPLICATION_TYPE_QUERY_MODE).

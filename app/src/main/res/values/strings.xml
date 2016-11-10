@@ -29,4 +29,9 @@
     <string name="setup_waiting_time">Setup waiting time</string>
     <string name="select_language">Select language</string>
     <string name="loading_website">Loading Questions</string>
+    <string name="what_to_do_message">Please answer the questions about your application to get the average waiting time for similar applications</string>
+    <string name="wrong_link_webview">This Web browser can only be used for getting the average waiting time</string>
+    <string name="alpha_incorrect_state">Error: incorrect state</string>
+
+
 </resources>

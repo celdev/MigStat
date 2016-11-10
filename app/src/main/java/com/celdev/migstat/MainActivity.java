@@ -61,8 +61,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //resetAllData();
-        DataStorage.getInstance().DEBUG_deleteWaitingTime(this);
+        resetAllData();
+        //DataStorage.getInstance().deleteWaitingTime(this);
 
 
 
@@ -74,9 +74,19 @@ public class MainActivity extends AppCompatActivity {
         initNumberField();
         initProgressDialog();
         checkState();
-
     }
 
+    /*  Checks the state of the saved data in the application
+    *   There's 3 states
+    *   1: Have all information (waiting time and application information)
+    *   2: No application
+    *   3: No waiting time
+    *
+    *   Depending on the state of the application the enabled GUI-elements should be altered
+    *   if the application is set the possibility to change application number should be removed
+    *   if the waiting time is set (and application) the user will be brought to the
+    *   ShowStatus-activity.
+    * */
     private void checkState() {
         try {
             application = DataStorage.getInstance().loadApplication(this);
@@ -88,6 +98,7 @@ public class MainActivity extends AppCompatActivity {
                 setLockMode(ViewLockMode.APPLICATION_LOCK);
             }
         } catch (NoApplicationException e) {
+            DataStorage.getInstance().deleteWaitingTime(this);
             e.printStackTrace();
         }
     }
@@ -370,7 +381,7 @@ public class MainActivity extends AppCompatActivity {
     private enum ViewLockMode {
         APPLICATION_LOCK,
         WAITING_TIME_LOCK,
-        UNLOCK_APPLICATION;
+        UNLOCK_APPLICATION
     }
 
 }
