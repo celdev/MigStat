@@ -59,6 +59,14 @@ public class WaitingTime {
         this.query = query;
     }
 
+    public int getLowMonth() {
+        return lowMonth;
+    }
+
+    public int getHighMonth() {
+        return highMonth;
+    }
+
     public double getAverage() {
         if (useCustomMonths) {
             return customMonths;

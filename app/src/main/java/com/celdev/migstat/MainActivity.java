@@ -23,7 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
-import com.celdev.migstat.controller.Controller;
+import com.celdev.migstat.controller.ApplicationStatusChecker;
 import com.celdev.migstat.controller.DataStorage;
 import com.celdev.migstat.controller.NoApplicationException;
 import com.celdev.migstat.controller.NoWaitingTimeException;
@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        resetAllData();
+        //resetAllData();
         //DataStorage.getInstance().deleteWaitingTime(this);
 
 
@@ -336,7 +336,7 @@ public class MainActivity extends AppCompatActivity {
         checkStatusButton.setEnabled(false);
         application = null;
         progressDialog.show();
-        new Controller(applicationAsyncReceiver).checkApplication(Integer.valueOf(applicationNumberField.getText().toString()), getApplicationNumberType());
+        new ApplicationStatusChecker(applicationAsyncReceiver).checkApplication(Integer.valueOf(applicationNumberField.getText().toString()), getApplicationNumberType());
     }
 
 

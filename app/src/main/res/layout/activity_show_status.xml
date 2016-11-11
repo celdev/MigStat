@@ -10,24 +10,69 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.celdev.migstat.ShowStatus">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="avg months"
-        android:id="@+id/avg_months"
-        />
-<!--
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="applicationnumber"
-        android:id="@+id/application_number"/>
 
-    <TextView
+    <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="query type"
-        android:id="@+id/query_type"
-        />
--->
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/progress_bar_frame">
+        <ProgressBar
+            android:layout_width="@dimen/progressbar_width"
+            android:layout_height="@dimen/progressbar_height"
+            android:indeterminate="false"
+            style="?android:progressBarStyleHorizontal"
+            android:id="@+id/progress_bar"
+            android:max="10000"
+            android:background="@drawable/circle_shape"
+            android:progressDrawable="@drawable/circular_progress_bar"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="45,938231%"
+            android:id="@+id/progress_bar_text"
+            android:layout_gravity="center"
+            android:textColor="@color/white"
+            android:textSize="@dimen/progress_text_size" />
+
+        <ImageButton
+            android:layout_width="@dimen/reload_button"
+            android:layout_height="@dimen/reload_button"
+            android:scaleType="fitXY"
+            android:src="@drawable/ic_reload"
+            android:id="@+id/progress_reload_button"
+            android:background="@color/transparent"
+            android:tint="@color/white"
+            android:layout_gravity="center"
+            android:layout_marginTop="55dp"
+            android:contentDescription="@string/reload_button" />
+
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_alignParentStart="true">
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/application_date_text"
+            android:layout_weight="1"
+            android:textSize="@dimen/show_status_info_text_size"
+            android:textColor="@color/show_status_info_text_dark"
+            android:text="@string/application_date"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/show_status_info_text_size"
+            android:textColor="@color/show_status_info_text_dark"
+            android:id="@+id/application_date_number"
+            android:text="2016-01-01"/>
+    </LinearLayout>
+
+
 </RelativeLayout>

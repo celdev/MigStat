@@ -8,5 +8,14 @@
     <color name="transparent">#00ffffff</color>
 
 
+    <color name="progress_start">#4b9ac7</color>
+    <color name="progress_center">#2a5886</color>
+    <color name="progress_end">#407ec1</color>
+    <color name="progress_bar_background_start">#acacac</color>
+    <color name="progress_bar_background_center">#acacac</color>
+    <color name="progress_bar_background_end">#acacac</color>
+    <color name="inside_progress_shape">#393939</color>
+    <color name="progress_bar_shadow">#393939</color>
+    <color name="show_status_info_text_dark">#393939</color>
 
 </resources>

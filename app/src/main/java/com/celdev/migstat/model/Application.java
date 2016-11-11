@@ -32,14 +32,22 @@ public class Application{
         return waitingTime;
     }
 
-    public boolean setWaitingTimeReturnIsNewer(WaitingTime waitingTime) {
-        boolean isNewerWaitingTime = false;
+    /*  Sets the new waiting time and returns an object containing
+    *   the new and the old waiting time if:
+    *       * there is an old waiting time
+    *       * the "updated at" date of the old waiting time is older than the new waiting time
+    * */
+    public OldAndNewWaitingTimeWrapper setWaitingTimeReturnBothIfNewer(WaitingTime waitingTime) {
         if (this.waitingTime != null) {
             int newer = WaitingTime.WaitingTimeUpdatedDateComparator.compare(this.waitingTime, waitingTime);
-            isNewerWaitingTime = newer == -1;
+            if(newer == -1);{
+                OldAndNewWaitingTimeWrapper ret = new OldAndNewWaitingTimeWrapper(this.waitingTime, waitingTime);
+                this.waitingTime = waitingTime;
+                return ret;
+            }
         }
         this.waitingTime = waitingTime;
-        return isNewerWaitingTime;
+        return null;
     }
 
     public long getApplicationDate() {
@@ -65,6 +73,24 @@ public class Application{
             getApplicationStatus().setStatus(statusType.getNumber());
         } catch (NoApplicationNumberException e) {
             //ignore
+        }
+    }
+
+    public class OldAndNewWaitingTimeWrapper {
+        private WaitingTime oldWaitingTime;
+        private WaitingTime newWaitingTime;
+
+        public OldAndNewWaitingTimeWrapper(WaitingTime oldWaitingTime, WaitingTime newWaitingTime) {
+            this.oldWaitingTime = oldWaitingTime;
+            this.newWaitingTime = newWaitingTime;
+        }
+
+        public WaitingTime getOldWaitingTime() {
+            return oldWaitingTime;
+        }
+
+        public WaitingTime getNewWaitingTime() {
+            return newWaitingTime;
         }
     }
 

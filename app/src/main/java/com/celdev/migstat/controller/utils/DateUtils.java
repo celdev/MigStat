@@ -1,12 +1,17 @@
 package com.celdev.migstat.controller.utils;
 
 import com.celdev.migstat.model.ParserException;
+
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.Locale;
 
 /*  This class contains static helper methods for date-manipulation and conversion
 * */
 public class DateUtils {
 
+    public static final long MS_IN_A_MONTH = 2628000000L;
 
     /*  Converts a YYYY-MM-DD string into Calendar object
     *   Throws an exception is the date isn't valid
@@ -80,6 +85,18 @@ public class DateUtils {
     //returns true if first is an older date than second.
     public static boolean isNewerDate(String first, String second) throws ParserException {
         return 1 == compareDateStrings(first, second);
+    }
+
+    public static String msToDateString(Long ms) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(ms);
+        return new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(calendar.getTime());
+    }
+
+
+    public static long addAverageMonthsToStartDate(long start, double avgMonths) {
+        long avgMonthsInMS = (long)(avgMonths * MS_IN_A_MONTH);
+        return start + avgMonthsInMS;
     }
 
 }

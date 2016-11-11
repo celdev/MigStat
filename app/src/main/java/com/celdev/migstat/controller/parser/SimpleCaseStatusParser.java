@@ -109,6 +109,15 @@ public class SimpleCaseStatusParser {
         public ApplicationDate getApplicationDate() {
             return applicationDate;
         }
+
+        @Override
+        public String toString() {
+            return "StatusAndDate{" +
+                    "statusType=" + statusType +
+                    ", applicationDate=" + applicationDate +
+                    ", applicationNumber=" + applicationNumber +
+                    '}';
+        }
     }
 
 

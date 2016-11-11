@@ -32,6 +32,14 @@
     <string name="what_to_do_message">Please answer the questions about your application to get the average waiting time for similar applications</string>
     <string name="wrong_link_webview">This Web browser can only be used for getting the average waiting time</string>
     <string name="alpha_incorrect_state">Error: incorrect state</string>
+    <string name="application_date">Application date</string>
+    <string name="reload_button">Reload status</string>
+    <string name="error_reload">Error reloading status</string>
+    <string name="new_waiting_time_message">The Swedish Migration Agency have updated the estimated waiting time.
+        \nOld estimate: %1$d-%2$d months
+        \nNew estimate: %3$d-%4$d months
+    </string>
+    <string name="refreshed_status">Refreshed Application Status</string>
 
 
 </resources>
