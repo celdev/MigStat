@@ -24,6 +24,14 @@
     <dimen name="progressbar_thickness">20dp</dimen>
     <dimen name="progressbar_thickness_shadow">3dp</dimen>
     <dimen name="progress_text_size">24sp</dimen>
-    <dimen name="show_status_info_text_size">18sp</dimen>
+    <dimen name="show_status_info_text_size">22sp</dimen>
     <dimen name="reload_button">35dp</dimen>
+    <dimen name="info_spacing">10dp</dimen>
+    <dimen name="show_status_info_text_size_big">24sp</dimen>
+    <dimen name="info_background_corner_radius">7dp</dimen>
+    <dimen name="top_info_padding">8dp</dimen>
+    <dimen name="mid_info_padding">40dp</dimen>
+    <dimen name="mid_info_box_width">130dp</dimen>
+    <dimen name="info_border_width">2dp</dimen>
+    <dimen name="progress_status_text_size">18sp</dimen>
 </resources>

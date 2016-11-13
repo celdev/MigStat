@@ -35,6 +35,12 @@ public class WaitingTime {
         this.query = query;
     }
 
+    //returns true if lowMonth == highMonth, waiting time is in days or using custom months mode
+    //is set
+    public boolean lowMonthAndHighMonthIsEqual() {
+        return useCustomMonths || highMonth == lowMonth || dayOrMonth.equals(DayOrMonth.DAY);
+    }
+
     public void setUseCustomMonthsMode(int customMonths) {
         this.customMonths = customMonths;
         this.useCustomMonths = true;

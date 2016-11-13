@@ -76,6 +76,7 @@ public class SimpleCaseStatusParser {
                 ApplicationDate applicationDate = extractApplicationDate(document);
                 return new StatusAndDate(applicationStatus, applicationDate, applicationNumbers[0]);
             } catch (Exception e) {
+                e.printStackTrace();
                 return null;
             }
         }

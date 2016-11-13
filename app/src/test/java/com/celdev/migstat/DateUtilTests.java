@@ -43,6 +43,9 @@ public class DateUtilTests {
         WaitingTime old = new WaitingTime(13, 14, "2016-01-01", "test");
         WaitingTime newer = new WaitingTime(13, 14, "2016-01-02", "test");
         assertEquals(-1, WaitingTime.WaitingTimeUpdatedDateComparator.compare(old, newer));
+
+
+
     }
 
     private Object returnNullIfException(String first, String second) {

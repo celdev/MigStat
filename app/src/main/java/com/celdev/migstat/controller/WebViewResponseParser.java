@@ -6,6 +6,7 @@ import com.celdev.migstat.MainActivity;
 import com.celdev.migstat.controller.parser.AsyncTaskResultReceiver;
 import com.celdev.migstat.controller.parser.ComplexWaitingTimeParsers;
 import com.celdev.migstat.controller.parser.MonthsWaitingTimeParser;
+import com.celdev.migstat.controller.parser.WaitingTimeParser;
 import com.celdev.migstat.model.MultipleWaitingTimeWrapper;
 import com.celdev.migstat.model.ParserException;
 import com.celdev.migstat.model.WaitingTime;
@@ -26,8 +27,11 @@ public class WebViewResponseParser {
 
     private static final String NOT_COMPLEX = "not_complex";
 
-    public WebViewResponseParser(String query, AsyncTaskResultReceiver asyncTaskResultReceiver) throws ParserException {
+    public WebViewResponseParser(String query, AsyncTaskResultReceiver asyncTaskResultReceiver) {
         String parserType = returnComplexString(query);
+        if (query.trim().isEmpty()) {
+            asyncTaskResultReceiver.receiveResult(null);
+        }
         switch (parserType) {
             case NOT_COMPLEX:
                 Log.d(MainActivity.LOG_KEY, "Using not complex parser");
@@ -35,7 +39,12 @@ public class WebViewResponseParser {
                 break;
             default:
                 Log.d(MainActivity.LOG_KEY, "Using complex parser");
-                ComplexWaitingTimeParsers.getCorrectWaitingTimeParser(parserType, asyncTaskResultReceiver).execute(query);
+                WaitingTimeParser waitingTimeParser = ComplexWaitingTimeParsers.getCorrectWaitingTimeParser(parserType, asyncTaskResultReceiver);
+                if (waitingTimeParser != null) {
+                    waitingTimeParser.execute(query);
+                } else {
+                    asyncTaskResultReceiver.receiveResult(null);
+                }
         }
     }
 

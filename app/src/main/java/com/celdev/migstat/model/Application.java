@@ -1,6 +1,9 @@
 package com.celdev.migstat.model;
 
 import android.content.Context;
+import android.util.Log;
+
+import com.celdev.migstat.MainActivity;
 
 
 public class Application{
@@ -37,10 +40,10 @@ public class Application{
     *       * there is an old waiting time
     *       * the "updated at" date of the old waiting time is older than the new waiting time
     * */
-    public OldAndNewWaitingTimeWrapper setWaitingTimeReturnBothIfNewer(WaitingTime waitingTime) {
+    public synchronized OldAndNewWaitingTimeWrapper setWaitingTimeReturnBothIfNewer(WaitingTime waitingTime) {
         if (this.waitingTime != null) {
             int newer = WaitingTime.WaitingTimeUpdatedDateComparator.compare(this.waitingTime, waitingTime);
-            if(newer == -1);{
+            if(newer == -1){
                 OldAndNewWaitingTimeWrapper ret = new OldAndNewWaitingTimeWrapper(this.waitingTime, waitingTime);
                 this.waitingTime = waitingTime;
                 return ret;

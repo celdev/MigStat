@@ -6,9 +6,9 @@
     <string name="application_number">Application number</string>
 
     <array name="case_status_types">
-        <item>Application received</item>
-        <item>Decision pending</item>
-        <item>A decision has been made</item>
+        <item>Application\nreceived</item>
+        <item>Decision\npending</item>
+        <item>A decision\nhas been made</item>
     </array>
     <string name="check_case_button">OK</string>
 
@@ -40,6 +40,13 @@
         \nNew estimate: %3$d-%4$d months
     </string>
     <string name="refreshed_status">Refreshed Application Status</string>
+    <string name="estimated_months_placeholder">%1$d-%2$d months</string>
+    <string name="estimated_months_placeholder_single_month">%1$d months</string>
+    <string name="estimated_months_placeholder_single_day">%1$d days</string>
+    <string name="loading...">loading…</string>
+    <string name="estimated_months_string">Estimated months:</string>
+    <string name="days_waited_text">Days\nwaited</string>
+    <string name="days_to_decision">Estimated days\nto decision</string>
 
 
 </resources>

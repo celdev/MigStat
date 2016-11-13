@@ -25,6 +25,7 @@ public class ApplicationStatusChecker implements AsyncTaskResultReceiver{
             ApplicationNumber applicationNumber = application.getApplicationNumber();
             checkApplication(applicationNumber.getApplicationNumber(), applicationNumber.getApplicationNumberType());
         } catch (NoApplicationNumberException e) {
+            e.printStackTrace();
             receiveResult(null);
         }
     }

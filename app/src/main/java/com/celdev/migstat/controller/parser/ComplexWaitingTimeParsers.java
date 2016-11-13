@@ -15,7 +15,7 @@ import static com.celdev.migstat.controller.WebViewResponseParser.VISIT_SWEDEN;
 
 public class ComplexWaitingTimeParsers {
 
-    public static WaitingTimeParser getCorrectWaitingTimeParser(String type, AsyncTaskResultReceiver asyncTaskResultReceiver) throws ParserException{
+    public static WaitingTimeParser getCorrectWaitingTimeParser(String type, AsyncTaskResultReceiver asyncTaskResultReceiver){
         switch (type) {
             case VISIT_SWEDEN:
                 return new VisitSwedenWaitingTimeParser(asyncTaskResultReceiver);
@@ -26,7 +26,7 @@ public class ComplexWaitingTimeParsers {
             case UT_CARD_FOR_EU_FAMILY:
                 return new UTCardForEUFamilyWaitingTimeParser(asyncTaskResultReceiver);
         }
-        throw new ParserException();
+        return null;
     }
 
     private static class TravelDocumentWaitingTimeParser extends WaitingTimeParser {

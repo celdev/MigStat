@@ -33,21 +33,31 @@ import com.celdev.migstat.view.CustomNewWaitingTimeDialog;
 import com.celdev.migstat.view.ViewUpdateReceiver;
 
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 
 public class ShowStatus extends AppCompatActivity {
-
-    private static final long ROTATE_ANIMATION_TIME_MS = 1000L;
 
     private Application application;
     private ProgressBar progressBar;
     private ImageButton refreshButton;
-    private TextView applicationDateTextView, progressBarText;
+    private TextView applicationDateTextView, progressBarText, estimatedMonthsText, applicationStatusText;
+    private FrameLayout progressBarFrame;
 
     private ProgressBarUpdaterThread progressBarUpdaterThread;
+
+    private boolean fromOnCreate = false;
+
+    private long timeWhenLastUpdatedStatus = 0;
+    private long timeWhenLastUpdatedWaitingTime = 0;
+
+    private static final long UPDATE_MS_TRESHHOLD = 1800000; //30 minutes
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(MainActivity.LOG_KEY, "onCreate called");
+        fromOnCreate = true;
         setContentView(R.layout.activity_show_status);
         initViews();
         try {
@@ -56,6 +66,19 @@ public class ShowStatus extends AppCompatActivity {
             returnToMainActivityBecauseError(R.string.alpha_incorrect_state,true);
         }
         initButtonFunctionality();
+        removeRefreshButtonIfNoApplicationNumberAndNoWaitingTimeQuery();
+    }
+
+    /*  If the application doesn't have an application number
+    *   and doesn't have a "application type" query (created in the webview)
+    *   updating the waiting time and status does nothing
+    * */
+    private void removeRefreshButtonIfNoApplicationNumberAndNoWaitingTimeQuery() {
+        if (!application.isHasApplicationNumber() &&
+                application.getWaitingTime() != null &&
+                application.getWaitingTime().getQuery().isEmpty()) {
+            progressBarFrame.removeView(refreshButton);
+        }
     }
 
     private void initButtonFunctionality() {
@@ -69,7 +92,7 @@ public class ShowStatus extends AppCompatActivity {
 
     private void rotateRefreshButton() {
         final Animation ani = new RotateAnimation(0, 360, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
-        ani.setDuration(1000);
+        ani.setDuration(500);
         ani.setRepeatCount(Animation.INFINITE);
         ani.setRepeatMode(Animation.RESTART);
         refreshButton.startAnimation(ani);
@@ -82,6 +105,9 @@ public class ShowStatus extends AppCompatActivity {
         refreshButton = (ImageButton) findViewById(R.id.progress_reload_button);
         applicationDateTextView = (TextView) findViewById(R.id.application_date_number);
         progressBarText = (TextView) findViewById(R.id.progress_bar_text);
+        estimatedMonthsText = (TextView) findViewById(R.id.estimated_months_number);
+        progressBarFrame = (FrameLayout) findViewById(R.id.progress_bar_frame);
+        applicationStatusText = (TextView) findViewById(R.id.application_status_text);
     }
 
     private ViewUpdateReceiver refreshStatusReceiver = new ViewUpdateReceiver() {
@@ -92,25 +118,25 @@ public class ShowStatus extends AppCompatActivity {
                 Toast.makeText(ShowStatus.this, R.string.error_reload, Toast.LENGTH_LONG).show();
             }
             if (object instanceof SimpleCaseStatusParser.StatusAndDate) {
+                timeWhenLastUpdatedStatus = System.currentTimeMillis();
                 SimpleCaseStatusParser.StatusAndDate statusAndDate = (SimpleCaseStatusParser.StatusAndDate) object;
                 Log.d(MainActivity.LOG_KEY, "received status update" + statusAndDate.toString());
                 Toast.makeText(ShowStatus.this, R.string.refreshed_status, Toast.LENGTH_SHORT).show();
+                int index = statusAndDate.getStatusType().getNumber();
+                if (index >= 0 && index < 3) {
+                    applicationStatusText.setText(getResources().getStringArray(R.array.case_status_types)[index]);
+                } else {
+                    applicationStatusText.setText("");
+                }
             }
         }
     };
-
-
-
 
     private void loadApplication() throws NoApplicationException, NoWaitingTimeException {
         application = DataStorage.getInstance().loadApplication(this);
         setApplicationViewInformation();
         WaitingTimeDataStoragePacket waitingTimeDataStoragePacket = DataStorage.getInstance().loadWaitingTime(this);
-        try {
-            new WebViewResponseParser(waitingTimeDataStoragePacket.getQuery(), waitingTimeReceiver);
-        } catch (ParserException e) {
-            e.printStackTrace();
-        }
+        new WebViewResponseParser(waitingTimeDataStoragePacket.getQuery(), waitingTimeReceiver);
     }
 
     private void setApplicationViewInformation() {
@@ -129,13 +155,15 @@ public class ShowStatus extends AppCompatActivity {
     private AsyncTaskResultReceiver waitingTimeReceiver = new AsyncTaskResultReceiver() {
         @Override
         public void receiveResult(Object object) {
-            System.out.println("result: " + object);
             if (object instanceof WaitingTime) {
-                Log.d(MainActivity.LOG_KEY, "Setting application waitingtime");
-                handleCheckOldNewWaitingTime(application.setWaitingTimeReturnBothIfNewer((WaitingTime) object));
+                timeWhenLastUpdatedWaitingTime = System.currentTimeMillis();
+                WaitingTime waitingTime = (WaitingTime) object;
+                handleCheckOldNewWaitingTime(application.setWaitingTimeReturnBothIfNewer(waitingTime));
+                estimatedMonthsText.setText(waitingTime.lowMonthAndHighMonthIsEqual()?
+                        getString(R.string.estimated_months_placeholder_single_month,waitingTime.getAverage()) :
+                        getString(R.string.estimated_months_placeholder, waitingTime.getLowMonth(), waitingTime.getHighMonth()));
                 refreshProgressThread();
             }
-            Log.d(MainActivity.LOG_KEY, "Application waiting time is: " + application.getWaitingTime().toString());
         }
     };
 
@@ -153,8 +181,59 @@ public class ShowStatus extends AppCompatActivity {
         progressBarUpdaterThread = new ProgressBarUpdaterThread(application.getApplicationDate(),application.getWaitingTime().getAverage());
     }
 
+    /*  This method is called before the application enters the onPaused state
+    *   kills the progressupdater thread (which updates the progressbar and progress text)
+    *   so that it doesn't steal resources when the application isn't visible
+    * */
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d(MainActivity.LOG_KEY, "onPause called");
+        if (progressBarUpdaterThread != null) {
+            progressBarUpdaterThread.kill();
+            progressBarUpdaterThread = null;
+        }
+        fromOnCreate = false;
+    }
 
+    /*  This method is called after the Activity is created (onCreate) or when
+    *   the application returns from the onPaused-state or goes from the onStart-state
+    *   https://developer.android.com/images/activity_lifecycle.png
+    *
+    *   if this method is called from (after) the onCreate-state we shouldn't do anything
+    *   since the onCreate-method will take care of the initializing of the application
+    *
+    *   if the method is called when returning from the onPaused state or from (after)
+    *   the onStart-state the progress thread should be updated (after the application
+    *   and waiting time has been fetched from the DataStorage if needed)
+    *
+    *   if there's something wrong with receiving the application or waitingtime from the
+    *   DataStorage an exception will be trown and the application will be reset
+    * */
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(MainActivity.LOG_KEY, "onResume called");
+        if (fromOnCreate) {
+            fromOnCreate = false;
+            return;
+        }
+        if (application != null && application.getWaitingTime() != null) {
+            refreshProgressThread();
+        } else {
+            try {
+                loadApplication();
+                refreshProgressThread();
+            } catch (NoApplicationException | NoWaitingTimeException e) {
+                Log.d(MainActivity.LOG_KEY, "Incorrect state, application or waiting time is null");
+                returnToMainActivityBecauseError(R.string.alpha_incorrect_state, true);
+            }
+        }
+    }
 
+    /*  Returns the user to the MainActivity and resets all stored data if shouldResetAllData is true
+    *   Shows a dialog with a message specified by the resource int provided as a parameter
+    * */
     private void returnToMainActivityBecauseError(@StringRes int message, boolean shouldResetAllData) {
         if (shouldResetAllData) {
             DataStorage.getInstance().deleteAllData(this);
@@ -168,7 +247,9 @@ public class ShowStatus extends AppCompatActivity {
         }).create().show();
     }
 
-
+    /*  This thread will handle the updating of the progressbar
+    *   and the progress text percent.
+    * */
     private class ProgressBarUpdaterThread extends Thread {
 
         private boolean alive = true;
@@ -184,7 +265,8 @@ public class ShowStatus extends AppCompatActivity {
         @Override
         public void run() {
 
-            final DecimalFormat decimalFormat = new DecimalFormat("0.########");
+            final DecimalFormat decimalFormat = new DecimalFormat("0.######", DecimalFormatSymbols.getInstance(Locale.forLanguageTag("se")));
+            decimalFormat.setMinimumFractionDigits(6);
             while (alive) {
                 final double percent = calculateProgress();
                 runOnUiThread(new Runnable() {
@@ -215,6 +297,17 @@ public class ShowStatus extends AppCompatActivity {
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (application != null) {
+            DataStorage.getInstance().saveApplication(this, application);
+            if (application.getWaitingTime() != null) {
+                DataStorage.getInstance().saveWaitingTimeDataStoragePacket(this, application.getWaitingTime());
+            }
+        }
+    }
+
+    @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             Intent intent = new Intent(Intent.ACTION_MAIN).
@@ -223,5 +316,53 @@ public class ShowStatus extends AppCompatActivity {
             startActivity(intent);
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    private class UpdateStatusAndWaitingTimeReceiver implements ViewUpdateReceiver, AsyncTaskResultReceiver {
+
+        private ViewUpdateReceiver viewUpdateReceiver;
+        private AsyncTaskResultReceiver asyncTaskResultReceiver;
+        private boolean receivedWaitingTime = false, receivedStatus = false;
+
+        private Object waitingTimeResult, statusResult;
+
+        public UpdateStatusAndWaitingTimeReceiver(ViewUpdateReceiver viewUpdateReceiver, AsyncTaskResultReceiver asyncTaskResultReceiver) {
+            this.viewUpdateReceiver = viewUpdateReceiver;
+            this.asyncTaskResultReceiver = asyncTaskResultReceiver;
+        }
+
+        private synchronized void pushToOuterClassIfReceivedBoth() {
+            if (receivedWaitingTime && receivedStatus) {
+                viewUpdateReceiver.receiveUpdate(statusResult);
+                asyncTaskResultReceiver.receiveResult(waitingTimeResult);
+            }
+        }
+
+        private synchronized void setReceived(boolean setReceivedStatus) {
+            if (setReceivedStatus) {
+                receivedStatus = true;
+            } else {
+                receivedWaitingTime = true;
+            }
+        }
+
+        @Override
+        public void receiveResult(Object object) {
+            //waitingtime
+            setReceived(false);
+            waitingTimeResult = object;
+        }
+
+        @Override
+        public void receiveUpdate(Object object) {
+            //status
+            setReceived(true);
+            statusResult = object;
+        }
+
+        public void check() {
+            new ApplicationStatusChecker(this).checkApplication(application);
+            new WebViewResponseParser(application.getWaitingTime().getQuery(), this);
+        }
     }
 }
