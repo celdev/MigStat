@@ -8,12 +8,17 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,13 +32,15 @@ import com.celdev.migstat.controller.parser.AsyncTaskResultReceiver;
 import com.celdev.migstat.controller.parser.SimpleCaseStatusParser;
 import com.celdev.migstat.controller.utils.DateUtils;
 import com.celdev.migstat.model.Application;
-import com.celdev.migstat.model.ParserException;
 import com.celdev.migstat.model.WaitingTime;
+import com.celdev.migstat.view.BackgroundChanger;
+import com.celdev.migstat.view.CustomAboutDialog;
 import com.celdev.migstat.view.CustomNewWaitingTimeDialog;
 import com.celdev.migstat.view.ViewUpdateReceiver;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.Date;
 import java.util.Locale;
 
 public class ShowStatus extends AppCompatActivity {
@@ -42,9 +49,13 @@ public class ShowStatus extends AppCompatActivity {
     private ProgressBar progressBar;
     private ImageButton refreshButton;
     private TextView applicationDateTextView, progressBarText, estimatedMonthsText, applicationStatusText;
+    private TextView daysSinceApplicationText, daysToDecisionText;
     private FrameLayout progressBarFrame;
 
+    private LinearLayout changeBgView;
     private ProgressBarUpdaterThread progressBarUpdaterThread;
+
+    private RelativeLayout root;
 
     private boolean fromOnCreate = false;
 
@@ -60,9 +71,11 @@ public class ShowStatus extends AppCompatActivity {
         fromOnCreate = true;
         setContentView(R.layout.activity_show_status);
         initViews();
+        changeBackground();
         try {
             loadApplication();
         } catch (NoApplicationException | NoWaitingTimeException e) {
+            e.printStackTrace();
             returnToMainActivityBecauseError(R.string.alpha_incorrect_state,true);
         }
         initButtonFunctionality();
@@ -101,6 +114,7 @@ public class ShowStatus extends AppCompatActivity {
     }
 
     private void initViews() {
+        root = (RelativeLayout) findViewById(R.id.activity_show_status);
         progressBar = (ProgressBar) findViewById(R.id.progress_bar);
         refreshButton = (ImageButton) findViewById(R.id.progress_reload_button);
         applicationDateTextView = (TextView) findViewById(R.id.application_date_number);
@@ -108,6 +122,9 @@ public class ShowStatus extends AppCompatActivity {
         estimatedMonthsText = (TextView) findViewById(R.id.estimated_months_number);
         progressBarFrame = (FrameLayout) findViewById(R.id.progress_bar_frame);
         applicationStatusText = (TextView) findViewById(R.id.application_status_text);
+        changeBgView = (LinearLayout)findViewById(R.id.change_bg_view);
+        daysSinceApplicationText = (TextView) findViewById(R.id.days_since_application_number);
+        daysToDecisionText = (TextView) findViewById(R.id.avg_days_to_decision_number);
     }
 
     private ViewUpdateReceiver refreshStatusReceiver = new ViewUpdateReceiver() {
@@ -136,11 +153,19 @@ public class ShowStatus extends AppCompatActivity {
         application = DataStorage.getInstance().loadApplication(this);
         setApplicationViewInformation();
         WaitingTimeDataStoragePacket waitingTimeDataStoragePacket = DataStorage.getInstance().loadWaitingTime(this);
-        new WebViewResponseParser(waitingTimeDataStoragePacket.getQuery(), waitingTimeReceiver);
+        if (waitingTimeDataStoragePacket.isCustomMode()) {
+            application.setWaitingTimeReturnBothIfNewer(
+                    new WaitingTime(waitingTimeDataStoragePacket.getCustomMonths(),
+                            waitingTimeDataStoragePacket.getCustomMonths(),
+                            DateUtils.msToDateString(System.currentTimeMillis()), ""));
+        } else {
+            new WebViewResponseParser(waitingTimeDataStoragePacket.getQuery(), waitingTimeReceiver);
+        }
     }
 
     private void setApplicationViewInformation() {
         applicationDateTextView.setText(DateUtils.msToDateString(application.getApplicationDate()));
+        daysSinceApplicationText.setText("" + DateUtils.daysWaited(application.getApplicationDate()));
     }
 
     private void disableRefreshAnimation() {
@@ -163,6 +188,10 @@ public class ShowStatus extends AppCompatActivity {
                         getString(R.string.estimated_months_placeholder_single_month,waitingTime.getAverage()) :
                         getString(R.string.estimated_months_placeholder, waitingTime.getLowMonth(), waitingTime.getHighMonth()));
                 refreshProgressThread();
+                daysToDecisionText.setText("" + DateUtils.daysUntilDecision(
+                        DateUtils.addAverageMonthsToDate(
+                                application.getApplicationDate(),
+                                waitingTime.getAverage())));
             }
         }
     };
@@ -258,7 +287,7 @@ public class ShowStatus extends AppCompatActivity {
 
         private ProgressBarUpdaterThread(long startDateMS, double averageMonths) {
             this.startDateMS = startDateMS;
-            this.estimatedEndDateMS = DateUtils.addAverageMonthsToStartDate(startDateMS, averageMonths);
+            this.estimatedEndDateMS = DateUtils.addAverageMonthsToDate(startDateMS, averageMonths);
             start();
         }
 
@@ -363,6 +392,56 @@ public class ShowStatus extends AppCompatActivity {
         public void check() {
             new ApplicationStatusChecker(this).checkApplication(application);
             new WebViewResponseParser(application.getWaitingTime().getQuery(), this);
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+        try {
+            menuInflater.inflate(R.menu.show_menu, menu);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_about:
+                showAboutDialog();
+                return true;
+            case R.id.menu_unlock_theme:
+                return true;
+            case R.id.menu_change_bg:
+                setChangeBackgroundMode();
+                return true;
+            case R.id.menu_reset_application:
+                DataStorage.getInstance().deleteAllData(this);
+                startActivity(new Intent(this, MainActivity.class));
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void setChangeBackgroundMode() {
+        new BackgroundChanger(root, changeBgView, this);
+    }
+
+    private void showAboutDialog() {
+        new CustomAboutDialog(this).createAndShow();
+    }
+
+    public void removeSetBG() {
+        changeBgView.removeAllViewsInLayout();
+    }
+
+    private void changeBackground() {
+        int backgroundIndex = DataStorage.getInstance().getBackgroundIndex(this);
+        int[] backgrounds = BackgroundChanger.drawables;
+        if (backgroundIndex > 0 && backgroundIndex < backgrounds.length) {
+            root.setBackground(getDrawable(backgrounds[backgroundIndex]));
         }
     }
 }

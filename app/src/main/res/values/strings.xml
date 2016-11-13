@@ -46,7 +46,39 @@
     <string name="loading...">loading…</string>
     <string name="estimated_months_string">Estimated months:</string>
     <string name="days_waited_text">Days\nwaited</string>
-    <string name="days_to_decision">Estimated days\nto decision</string>
+    <string name="days_to_decision">Estimated\ndays left</string>
+    <string name="about">About</string>
+    <string name="about_message">
+        <b>Privacy</b>\n
+        This application only stores information locally on your device.
+        \nThe information you provide is only used to query the Swedish Migration Agency website and the
+        results of those queries are formatted and shown to you.
+        \n<b>Ads</b>
+        \nThis Application uses AdMob which may use the advertising ID of your device to better serve targeted ads.
+        \nIf you want to opt out of this please visit https://www.google.com/settings/u/0/ads/authenticated
+        \n\n<b>Usage</b>
+        \nThis application is still a alpha version, and it is possible and probable it won\'nt graduate to even a beta version.
+        \nYou can expect frequent crashes and broken functionality as this application is build on the functionality of the Swedish Migration Agency\'s website.
+        \nYou can expect some functions to be completely broken since the ability to test those functions would require the knowledge about exactly when a case would get a decision.
+        \nBecause of the information provided above, check your case on the Swedish Migration Agency\'s website if you want to be sure about your case\'s status.
+        \n\n<b>Legal</b>
+        \nTHE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+        \n\n<b>Libraries</b>
+        This application was made as the final project of a mobile programming course I studied.\n\nThis application is NOT an official application of the Swedish Migration Agency.\n\nThis application was made by a person who is/was waiting for the Swedish Migration Agency to make a decision in
+        his girlfriend\'s case.
+        \n\nThis application uses JSoup (distributed under the MIT license (Copyright © 2009 - 2016 Jonathan Hedley (jonathan@hedley.net))) to parse migrationsverkets website.
+        \n\n<b>Contact</b>
+        \nIf you have any questions about this application you can email me at celers.dev@gmail.com
+        \nAny questions regarding your case should be directed towards http://www.migrationsverket.se/English/Contact-us/Call-us.html
 
+    </string>
+    <string name="menu_unlock_change_bg">Unlock themes</string>
+    <string name="change_bg">Change theme</string>
+    <string name="back">Back</string>
+    <string name="next">next</string>
+    <string name="reset_application">Reset application</string>
+    <string name="use_custom_waiting_time">Set custom waiting time</string>
+    <string name="cancel">Cancel</string>
+    <string name="choose_months">Choose custom waiting time in months</string>
 
 </resources>

@@ -20,7 +20,10 @@ public class DataStorage {
     private final static String APPLICATION_TYPE_QUERY = "APPLICATION_TYPE_QUERY";
     private final static String APPLICATION_TYPE_QUERY_MODE = "APPLICATION_TYPE_QUERY_MODE";
     private final static String APPLICATION_TYPE_QUERY_CUSTOM_MONTHS = "APPLICATION_TYPE_QUERY_CUSTOM_MONTHS";
+    private final static String APP_BACKGROUND_INDEX = "APP_BACKGROUND_INDEX";
     private final static String PREFERENCE_KEY = MainActivity.APPLICATION_KEY + ".";
+
+
 
     private final static String VERSION_KEY = "VERSION_KEY";
 
@@ -39,6 +42,15 @@ public class DataStorage {
     private DataStorage() {
     }
 
+    public int getBackgroundIndex(Context context) {
+        SharedPreferences preferences = getSharedPreference(context);
+        return preferences.getInt(APP_BACKGROUND_INDEX, 0);
+    }
+
+    public void storeBackgroundIndex(Context context, int index) {
+        SharedPreferences preferences = getSharedPreference(context);
+        preferences.edit().putInt(APP_BACKGROUND_INDEX, index).apply();
+    }
 
     public Application loadApplication(Context context) throws NoApplicationException{
         SharedPreferences preferences = getSharedPreference(context);

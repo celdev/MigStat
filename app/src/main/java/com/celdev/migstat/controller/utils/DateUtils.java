@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 /*  This class contains static helper methods for date-manipulation and conversion
 * */
@@ -94,9 +95,21 @@ public class DateUtils {
     }
 
 
-    public static long addAverageMonthsToStartDate(long start, double avgMonths) {
+    public static long addAverageMonthsToDate(long start, double avgMonths) {
         long avgMonthsInMS = (long)(avgMonths * MS_IN_A_MONTH);
         return start + avgMonthsInMS;
+    }
+
+    //returns the amount of days since applicationDate
+    public static long daysWaited(long applicationdate) {
+        long waitedMS = System.currentTimeMillis() - applicationdate;
+        return TimeUnit.DAYS.convert(waitedMS, TimeUnit.MILLISECONDS);
+    }
+
+    //returns the amount of days until avgDecisionEpochMS
+    public static long daysUntilDecision(long avgDecisionEpochMS) {
+        long msToDecision = avgDecisionEpochMS - System.currentTimeMillis();
+        return TimeUnit.DAYS.convert(msToDecision, TimeUnit.MILLISECONDS);
     }
 
 }

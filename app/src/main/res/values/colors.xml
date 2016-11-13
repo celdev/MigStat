@@ -19,5 +19,6 @@
     <color name="show_status_info_text_dark">#393939</color>
     <color name="info_background_color">#adffffff</color>
     <color name="info_background_color_border">#ffffff</color>
+    <color name="black">#000000</color>
 
 </resources>

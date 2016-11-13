@@ -11,12 +11,16 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.NumberPicker;
 import android.widget.RadioButton;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -32,8 +36,12 @@ import com.celdev.migstat.controller.parser.SimpleCaseStatusParser;
 import com.celdev.migstat.controller.utils.DateUtils;
 import com.celdev.migstat.model.Application;
 import com.celdev.migstat.model.ApplicationNumberType;
+import com.celdev.migstat.model.WaitingTime;
+import com.celdev.migstat.view.CustomAboutDialog;
 import com.celdev.migstat.view.CustomDatePickerDialog;
+import com.celdev.migstat.view.CustomSetWaitingTimeDialog;
 import com.celdev.migstat.view.IntegerInputListener;
+import com.celdev.migstat.view.NumberPickerDialogReturn;
 import com.celdev.migstat.view.ViewUpdateReceiver;
 
 import java.util.Calendar;
@@ -48,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
 
     private RadioButton caseRadioButton, checkRadioButton;
     private EditText applicationNumberField;
-    private Button checkStatusButton, setDateButton, afterSetDateButton;
+    private Button checkStatusButton, setDateButton, afterSetDateButton, customWaitingTimeButton;
     private ImageButton waitingTimeButtonEng, waitingTimeButtonSwe;
 
     private ViewSwitcher replaceView;
@@ -61,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        resetAllData();
+        //resetAllData();
         //DataStorage.getInstance().deleteWaitingTime(this);
 
 
@@ -149,6 +157,7 @@ public class MainActivity extends AppCompatActivity {
     private void disableWaitingTimeButtons() {
         waitingTimeButtonSwe.setEnabled(false);
         waitingTimeButtonEng.setEnabled(false);
+        customWaitingTimeButton.setEnabled(false);
         Drawable grayEngFlag = getDrawable(R.drawable.ic_flag_of_the_united_kingdom);
         Drawable graySweFlag = getDrawable(R.drawable.ic_flag_of_sweden);
         if (grayEngFlag != null && graySweFlag != null) {
@@ -165,6 +174,7 @@ public class MainActivity extends AppCompatActivity {
     private void enableWaitingTimeButtons() {
         waitingTimeButtonSwe.setEnabled(true);
         waitingTimeButtonEng.setEnabled(true);
+        customWaitingTimeButton.setEnabled(true);
         Drawable grayEngFlag = getDrawable(R.drawable.ic_flag_of_the_united_kingdom);
         Drawable graySweFlag = getDrawable(R.drawable.ic_flag_of_sweden);
         if (grayEngFlag != null && graySweFlag != null) {
@@ -195,6 +205,27 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        customWaitingTimeButton = (Button) findViewById(R.id.custom_waitingtime_button);
+        customWaitingTimeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new CustomSetWaitingTimeDialog(MainActivity.this, new NumberPickerDialogReturn() {
+                    @Override
+                    public void returnOnOk(int months) {
+                        try {
+                            DataStorage.getInstance().
+                                    saveWaitingTimeDataStoragePacket(MainActivity.this,
+                                            new WaitingTime(months, months,
+                                                    DateUtils.msToDateString(System.currentTimeMillis()),
+                                                    "").setUseCustomMonthsMode(months));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        startActivity(new Intent(MainActivity.this, ShowStatus.class));
+                    }
+                }).createAndShow();
+            }
+        });
         disableWaitingTimeButtons();
 
     }
@@ -324,13 +355,35 @@ public class MainActivity extends AppCompatActivity {
 
     private void setOkIconAfterStatusCheck(boolean success) {
         if (success) {
-            applicationNumberField.setCompoundDrawablesWithIntrinsicBounds(0,0,android.R.drawable.checkbox_on_background,0);
+            applicationNumberField.setCompoundDrawablesWithIntrinsicBounds(0,0,R.drawable.ic_ok,0);
             setLockMode(ViewLockMode.APPLICATION_LOCK);
         } else {
             applicationNumberField.setCompoundDrawablesWithIntrinsicBounds(0,0,android.R.drawable.ic_delete,0);
         }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.only_about_menu, menu);
+        return true;
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_about:
+                showAboutDialog();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void showAboutDialog() {
+        new CustomAboutDialog(this).createAndShow();
+    }
 
     private void doStatusCheck() {
         checkStatusButton.setEnabled(false);

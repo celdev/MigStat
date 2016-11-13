@@ -102,7 +102,8 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_horizontal"
                     android:textSize="@dimen/show_status_info_text_size_big"
-                    android:text="213"
+                    android:id="@+id/days_since_application_number"
+                    android:text="@string/loading..."
                     />
             </LinearLayout>
             <LinearLayout
@@ -125,7 +126,8 @@
                     android:layout_height="wrap_content"
                     android:textSize="@dimen/show_status_info_text_size_big"
                     android:gravity="center_horizontal"
-                    android:text="132"
+                    android:id="@+id/avg_days_to_decision_number"
+                    android:text="@string/loading..."
                     />
 
             </LinearLayout>
@@ -134,12 +136,20 @@
         </RelativeLayout>
     </RelativeLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="25dp"
+        android:id="@+id/change_bg_view"
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true"
+        />
+
     <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/info_background_layout"
-        android:layout_centerHorizontal="true"
-        android:id="@+id/progress_bar_frame">
+        android:id="@+id/progress_bar_frame"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true">
         <ProgressBar
             android:layout_width="@dimen/progressbar_width"
             android:layout_height="@dimen/progressbar_height"
@@ -193,8 +203,6 @@
 
 
     </FrameLayout>
-
-
 
 
 </RelativeLayout>

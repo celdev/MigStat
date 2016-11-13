@@ -41,9 +41,10 @@ public class WaitingTime {
         return useCustomMonths || highMonth == lowMonth || dayOrMonth.equals(DayOrMonth.DAY);
     }
 
-    public void setUseCustomMonthsMode(int customMonths) {
+    public WaitingTime setUseCustomMonthsMode(int customMonths) {
         this.customMonths = customMonths;
         this.useCustomMonths = true;
+        return this;
     }
 
     public boolean isUseCustomMonths() {

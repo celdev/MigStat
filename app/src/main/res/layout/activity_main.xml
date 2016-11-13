@@ -153,28 +153,43 @@
                 android:gravity="center"
                 android:id="@+id/text_setup_waiting_time_type" />
 
-            <ImageButton
-                android:layout_width="@dimen/large_waiting_time_button_width"
-                android:layout_height="@dimen/large_waiting_time_button_height"
-                android:id="@+id/waitingtime_launcher_eng"
-                android:contentDescription="@string/waiting_time_launcher_button_text"
-                android:src="@drawable/ic_flag_of_the_united_kingdom"
-                android:layout_below="@+id/text_setup_waiting_time_type"
-                android:scaleType="fitCenter"
-                android:background="@color/transparent"
-                tools:src="@drawable/ic_flag_of_the_united_kingdom" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/flag_button_layout"
+                android:orientation="horizontal"
+                android:layout_below="@id/text_setup_waiting_time_type">
+                <ImageButton
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/large_waiting_time_button_height"
+                    android:id="@+id/waitingtime_launcher_eng"
+                    android:layout_weight="1"
+                    android:contentDescription="@string/waiting_time_launcher_button_text"
+                    android:src="@drawable/ic_flag_of_the_united_kingdom"
+                    android:scaleType="fitCenter"
+                    android:background="@color/transparent"
+                    tools:src="@drawable/ic_flag_of_the_united_kingdom" />
 
-            <ImageButton
-                android:layout_width="@dimen/large_waiting_time_button_width_swe"
-                android:layout_height="@dimen/large_waiting_time_button_height_swe"
-                android:scaleType="fitCenter"
-                android:id="@+id/waitingtime_launcher_swe"
-                android:background="@color/transparent"
-                android:layout_below="@+id/text_setup_waiting_time_type"
-                android:contentDescription="@string/waiting_time_launcher_button_text"
-                android:src="@drawable/ic_flag_of_sweden"
-                tools:src="@drawable/ic_flag_of_sweden"
-                android:layout_alignParentEnd="true" />
+                <ImageButton
+                    android:layout_width="@dimen/large_waiting_time_button_width_swe"
+                    android:layout_height="@dimen/large_waiting_time_button_height_swe"
+                    android:scaleType="fitCenter"
+                    android:id="@+id/waitingtime_launcher_swe"
+                    android:background="@color/transparent"
+                    android:contentDescription="@string/waiting_time_launcher_button_text"
+                    android:src="@drawable/ic_flag_of_sweden"
+                    tools:src="@drawable/ic_flag_of_sweden" />
+            </LinearLayout>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/custom_waitingtime_button"
+                android:text="@string/use_custom_waiting_time"
+                android:layout_below="@id/flag_button_layout"
+                android:enabled="false"
+                />
+
 
 
 

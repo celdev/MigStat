@@ -7,13 +7,16 @@ import android.content.Intent;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.ProgressBar;
 
 import com.celdev.migstat.controller.DataStorage;
+import com.celdev.migstat.view.CustomAboutDialog;
 
 
 public class ApplicationTypeWebViewActivity extends AppCompatActivity {
@@ -135,5 +138,30 @@ public class ApplicationTypeWebViewActivity extends AppCompatActivity {
         Intent intent = new Intent(ApplicationTypeWebViewActivity.this, ShowStatus.class);
         startActivity(intent);
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.only_about_menu, menu);
+        return true;
+    }
+
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_about:
+                showAboutDialog();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void showAboutDialog() {
+        new CustomAboutDialog(this).createAndShow();
+    }
+
 }
 
