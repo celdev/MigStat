@@ -2,6 +2,7 @@ package com.celdev.migstat.controller.parser;
 
 import android.os.AsyncTask;
 
+import com.celdev.migstat.controller.AsyncCallback;
 import com.celdev.migstat.model.query.Query;
 
 import org.jsoup.Jsoup;
@@ -14,10 +15,10 @@ public abstract class WaitingTimeParser extends AsyncTask<String, Void, Object> 
     /*  The id the swedish response uses */
     public static final String SWEDISH_ID = "h-Tidtillbeslut";
 
-    private AsyncTaskResultReceiver asyncTaskResultReceiver;
+    private AsyncCallback asyncCallback;
 
-    public WaitingTimeParser(AsyncTaskResultReceiver asyncTaskResultReceiver) {
-        this.asyncTaskResultReceiver = asyncTaskResultReceiver;
+    public WaitingTimeParser(AsyncCallback asyncCallback) {
+        this.asyncCallback = asyncCallback;
     }
 
     /*  Returns the Document-object for the website returned when visiting the
@@ -43,7 +44,7 @@ public abstract class WaitingTimeParser extends AsyncTask<String, Void, Object> 
     /*  Sends the response back to the registered listener */
     @Override
     protected void onPostExecute(Object waitingTime) {
-        asyncTaskResultReceiver.receiveResult(waitingTime);
+        asyncCallback.receiveAsyncResult(waitingTime);
     }
 
 }

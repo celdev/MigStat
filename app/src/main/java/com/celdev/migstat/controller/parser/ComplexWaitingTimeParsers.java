@@ -1,5 +1,6 @@
 package com.celdev.migstat.controller.parser;
 
+import com.celdev.migstat.controller.AsyncCallback;
 import com.celdev.migstat.model.MultipleWaitingTimeWrapper;
 import com.celdev.migstat.model.ParserException;
 import com.celdev.migstat.model.query.Query;
@@ -15,24 +16,24 @@ import static com.celdev.migstat.controller.WebViewResponseParser.VISIT_SWEDEN;
 
 public class ComplexWaitingTimeParsers {
 
-    public static WaitingTimeParser getCorrectWaitingTimeParser(String type, AsyncTaskResultReceiver asyncTaskResultReceiver){
+    public static WaitingTimeParser getCorrectWaitingTimeParser(String type, AsyncCallback asyncCallback){
         switch (type) {
             case VISIT_SWEDEN:
-                return new VisitSwedenWaitingTimeParser(asyncTaskResultReceiver);
+                return new VisitSwedenWaitingTimeParser(asyncCallback);
             case CITIZENSHIP:
-                return new CitizenshipWaitingTimeParser(asyncTaskResultReceiver);
+                return new CitizenshipWaitingTimeParser(asyncCallback);
             case TRAVEL_DOCUMENT:
-                return new TravelDocumentWaitingTimeParser(asyncTaskResultReceiver);
+                return new TravelDocumentWaitingTimeParser(asyncCallback);
             case UT_CARD_FOR_EU_FAMILY:
-                return new UTCardForEUFamilyWaitingTimeParser(asyncTaskResultReceiver);
+                return new UTCardForEUFamilyWaitingTimeParser(asyncCallback);
         }
         return null;
     }
 
     private static class TravelDocumentWaitingTimeParser extends WaitingTimeParser {
 
-        private TravelDocumentWaitingTimeParser(AsyncTaskResultReceiver asyncTaskResultReceiver) {
-            super(asyncTaskResultReceiver);
+        private TravelDocumentWaitingTimeParser(AsyncCallback asyncCallback) {
+            super(asyncCallback);
         }
 
         @Override
@@ -55,8 +56,8 @@ public class ComplexWaitingTimeParsers {
     }
 
     private static class CitizenshipWaitingTimeParser extends WaitingTimeParser {
-        private CitizenshipWaitingTimeParser(AsyncTaskResultReceiver asyncTaskResultReceiver) {
-            super(asyncTaskResultReceiver);
+        private CitizenshipWaitingTimeParser(AsyncCallback asyncCallback) {
+            super(asyncCallback);
         }
 
         @Override
@@ -66,8 +67,8 @@ public class ComplexWaitingTimeParsers {
     }
 
     private static class UTCardForEUFamilyWaitingTimeParser extends WaitingTimeParser {
-        private UTCardForEUFamilyWaitingTimeParser(AsyncTaskResultReceiver asyncTaskResultReceiver) {
-            super(asyncTaskResultReceiver);
+        private UTCardForEUFamilyWaitingTimeParser(AsyncCallback asyncCallback) {
+            super(asyncCallback);
         }
 
         @Override
@@ -77,8 +78,8 @@ public class ComplexWaitingTimeParsers {
     }
 
     private static class VisitSwedenWaitingTimeParser extends WaitingTimeParser {
-        private VisitSwedenWaitingTimeParser(AsyncTaskResultReceiver asyncTaskResultReceiver) {
-            super(asyncTaskResultReceiver);
+        private VisitSwedenWaitingTimeParser(AsyncCallback asyncCallback) {
+            super(asyncCallback);
         }
 
         @Override

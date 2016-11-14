@@ -1,5 +1,6 @@
 package com.celdev.migstat.controller.parser;
 
+import com.celdev.migstat.controller.AsyncCallback;
 import com.celdev.migstat.model.ParserException;
 import com.celdev.migstat.model.WaitingTime;
 import com.celdev.migstat.model.query.Query;
@@ -10,8 +11,8 @@ import java.io.IOException;
 
 public class MonthsWaitingTimeParser extends WaitingTimeParser{
 
-    public MonthsWaitingTimeParser(AsyncTaskResultReceiver asyncTaskResultReceiver) {
-        super(asyncTaskResultReceiver);
+    public MonthsWaitingTimeParser(AsyncCallback asyncCallback) {
+        super(asyncCallback);
     }
 
     @Override

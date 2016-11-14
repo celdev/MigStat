@@ -28,6 +28,7 @@ import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
 import com.celdev.migstat.controller.ApplicationStatusChecker;
+import com.celdev.migstat.controller.Controller;
 import com.celdev.migstat.controller.DataStorage;
 import com.celdev.migstat.controller.NoApplicationException;
 import com.celdev.migstat.controller.NoWaitingTimeException;
@@ -42,11 +43,12 @@ import com.celdev.migstat.view.CustomDatePickerDialog;
 import com.celdev.migstat.view.CustomSetWaitingTimeDialog;
 import com.celdev.migstat.view.IntegerInputListener;
 import com.celdev.migstat.view.NumberPickerDialogReturn;
+import com.celdev.migstat.view.ViewInterface;
 import com.celdev.migstat.view.ViewUpdateReceiver;
 
 import java.util.Calendar;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ViewInterface {
 
 
     public static String LOG_KEY = "migstat";
@@ -65,6 +67,9 @@ public class MainActivity extends AppCompatActivity {
 
     private Switch useNumberSwitch;
     private Application application;
+
+    private Controller controller = Controller.getInstance(this, this);
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -84,30 +89,42 @@ public class MainActivity extends AppCompatActivity {
         checkState();
     }
 
+    @Override
+    public void modelChange(ModelChange modelChange) {
+        progressDialog.dismiss();
+        switch (modelChange) {
+            case APPLICATION_OK:
+                setOkIconAfterStatusCheck(true);
+                return;
+            case INVALID_APPLICATION:
+                checkStatusButton.setEnabled(true);
+                setOkIconAfterStatusCheck(false);
+                Toast.makeText(MainActivity.this, R.string.error_parsing_case, Toast.LENGTH_LONG).show();
+                return;
+        }
+    }
+
     /*  Checks the state of the saved data in the application
-    *   There's 3 states
-    *   1: Have all information (waiting time and application information)
-    *   2: No application
-    *   3: No waiting time
-    *
-    *   Depending on the state of the application the enabled GUI-elements should be altered
-    *   if the application is set the possibility to change application number should be removed
-    *   if the waiting time is set (and application) the user will be brought to the
-    *   ShowStatus-activity.
-    * */
+        *   There's 3 states
+        *   1: Have all information (waiting time and application information)
+        *   2: No application
+        *   3: No waiting time
+        *
+        *   Depending on the state of the application the enabled GUI-elements should be altered
+        *   if the application is set the possibility to change application number should be removed
+        *   if the waiting time is set (and application) the user will be brought to the
+        *   ShowStatus-activity.
+        * */
     private void checkState() {
-        try {
-            application = DataStorage.getInstance().loadApplication(this);
-            try {
-                WaitingTimeDataStoragePacket waitingTimeDataStoragePacket = DataStorage.getInstance().loadWaitingTime(this);
-                startActivity(new Intent(this, ShowStatus.class));
-            } catch (NoWaitingTimeException e) {
-                e.printStackTrace();
+        switch (controller.getApplicationState()) {
+            case NO_APPLICATION:
+                controller.deleteAll();
+                return;
+            case NO_WAITING_TIME:
                 setLockMode(ViewLockMode.APPLICATION_LOCK);
-            }
-        } catch (NoApplicationException e) {
-            DataStorage.getInstance().deleteWaitingTime(this);
-            e.printStackTrace();
+                return;
+            case HAVE_BOTH:
+                startActivity(new Intent(this, ShowStatus.class));
         }
     }
 
@@ -145,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (application != null) {
-                    DataStorage.getInstance().saveApplication(MainActivity.this, application);
+                    controller.saveApplication(application);
                     setLockMode(ViewLockMode.APPLICATION_LOCK);
                 }
             }
@@ -153,6 +170,14 @@ public class MainActivity extends AppCompatActivity {
 
         initWaitingTimeButtons();
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        controller = Controller.getInstance(this, this);
+    }
+
+
 
     private void disableWaitingTimeButtons() {
         waitingTimeButtonSwe.setEnabled(false);
@@ -213,11 +238,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void returnOnOk(int months) {
                         try {
-                            DataStorage.getInstance().
-                                    saveWaitingTimeDataStoragePacket(MainActivity.this,
-                                            new WaitingTime(months, months,
-                                                    DateUtils.msToDateString(System.currentTimeMillis()),
-                                                    "").setUseCustomMonthsMode(months));
+                            controller.saveWaitingTime(new WaitingTime(months));
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -332,27 +353,6 @@ public class MainActivity extends AppCompatActivity {
         alertDialog.show();
     }
 
-    private ViewUpdateReceiver applicationAsyncReceiver = new ViewUpdateReceiver() {
-        @Override
-        public void receiveUpdate(Object object) {
-            progressDialog.dismiss();
-            if (object == null) {
-                checkStatusButton.setEnabled(true);
-                setOkIconAfterStatusCheck(false);
-                Toast.makeText(MainActivity.this, R.string.error_parsing_case, Toast.LENGTH_LONG).show();
-            } else if (object instanceof SimpleCaseStatusParser.StatusAndDate) {
-                SimpleCaseStatusParser.StatusAndDate s = (SimpleCaseStatusParser.StatusAndDate) object;
-                application = new Application(getApplication(),
-                        s.getStatusType(),
-                        s.getApplicationDate().getApplicationDate(),
-                        s.getApplicationNumber().getApplicationNumber(),
-                        s.getApplicationNumber().getApplicationNumberType());
-                DataStorage.getInstance().saveApplication(getApplication(), application);
-                setOkIconAfterStatusCheck(true);
-            }
-        }
-    };
-
     private void setOkIconAfterStatusCheck(boolean success) {
         if (success) {
             applicationNumberField.setCompoundDrawablesWithIntrinsicBounds(0,0,R.drawable.ic_ok,0);
@@ -389,12 +389,12 @@ public class MainActivity extends AppCompatActivity {
         checkStatusButton.setEnabled(false);
         application = null;
         progressDialog.show();
-        new ApplicationStatusChecker(applicationAsyncReceiver).checkApplication(Integer.valueOf(applicationNumberField.getText().toString()), getApplicationNumberType());
+        controller.checkApplicationNumberReturnApplication(Integer.parseInt(applicationNumberField.getText().toString()), getApplicationNumberType());
     }
 
 
     private void resetAllData() {
-        DataStorage.getInstance().deleteAllData(this);
+        controller.deleteAll();
     }
 
 

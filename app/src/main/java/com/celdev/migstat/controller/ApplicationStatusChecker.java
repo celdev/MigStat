@@ -6,14 +6,13 @@ import com.celdev.migstat.model.Application;
 import com.celdev.migstat.model.ApplicationNumber;
 import com.celdev.migstat.model.ApplicationNumberType;
 import com.celdev.migstat.model.NoApplicationNumberException;
-import com.celdev.migstat.view.ViewUpdateReceiver;
 
 public class ApplicationStatusChecker implements AsyncTaskResultReceiver{
 
-    private ViewUpdateReceiver viewUpdateReceiver;
+    private AsyncCallback asyncCallback;
 
-    public ApplicationStatusChecker(ViewUpdateReceiver viewUpdateReceiver) {
-        this.viewUpdateReceiver = viewUpdateReceiver;
+    public ApplicationStatusChecker(AsyncCallback asyncCallback) {
+        this.asyncCallback = asyncCallback;
     }
 
     public void checkApplication(int applicationNumber, ApplicationNumberType applicationNumberType) {
@@ -26,19 +25,16 @@ public class ApplicationStatusChecker implements AsyncTaskResultReceiver{
             checkApplication(applicationNumber.getApplicationNumber(), applicationNumber.getApplicationNumberType());
         } catch (NoApplicationNumberException e) {
             e.printStackTrace();
-            receiveResult(null);
+            receiveResult(AsyncCallbackErrorObject.NO_APPLICATION_NUMBER);
         }
     }
 
     @Override
-    public void receiveResult(Object waitingTime) {
-        if (waitingTime == null) {
-            viewUpdateReceiver.receiveUpdate(null);
+    public void receiveResult(Object result) {
+        if (result instanceof SimpleCaseStatusParser.StatusAndDate) {
+            asyncCallback.receiveAsyncResult(result);
         } else {
-            if (waitingTime instanceof SimpleCaseStatusParser.StatusAndDate) {
-                SimpleCaseStatusParser.StatusAndDate s = (SimpleCaseStatusParser.StatusAndDate) waitingTime;
-                viewUpdateReceiver.receiveUpdate(s);
-            }
+            asyncCallback.receiveAsyncResult(AsyncCallbackErrorObject.PARSER_EXCEPTION);
         }
     }
 }

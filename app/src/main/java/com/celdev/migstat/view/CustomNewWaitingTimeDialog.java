@@ -9,7 +9,7 @@ import com.celdev.migstat.model.Application;
 
 public class CustomNewWaitingTimeDialog extends AlertDialog.Builder {
 
-    public CustomNewWaitingTimeDialog(Context context, Application.OldAndNewWaitingTimeWrapper oldNew) {
+    public CustomNewWaitingTimeDialog(Context context) {
         super(context);
         setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             @Override
@@ -17,10 +17,6 @@ public class CustomNewWaitingTimeDialog extends AlertDialog.Builder {
                 dialog.dismiss();
             }
         });
-        int oldStart = oldNew.getOldWaitingTime().getLowMonth();
-        int oldEnd = oldNew.getOldWaitingTime().getHighMonth();
-        int newStart = oldNew.getNewWaitingTime().getLowMonth();
-        int newEnd = oldNew.getNewWaitingTime().getHighMonth();
-        setMessage(context.getString(R.string.new_waiting_time_message, oldStart, oldEnd, newStart, newEnd));
+        setMessage(R.string.new_waiting_time_message);
     }
 }

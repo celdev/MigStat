@@ -18,9 +18,5 @@ public class MultipleWaitingTimeWrapper {
             waitingTime = new WaitingTime(lowMonth, highMonth, updatedAt, query);
         }
 
-        public WaitingTimeWrapper(String whatKindOfWaitingTime, int days, String updatedAt, String query) {
-            this.whatKindOfWaitingTime = whatKindOfWaitingTime;
-            waitingTime = new WaitingTime(days, updatedAt, query);
-        }
     }
 }

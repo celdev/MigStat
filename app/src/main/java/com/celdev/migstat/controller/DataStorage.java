@@ -2,6 +2,7 @@ package com.celdev.migstat.controller;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.celdev.migstat.MainActivity;
 
@@ -17,17 +18,21 @@ public class DataStorage {
     private final static String APPLICATION_NUMBER_TYPE = "APPLICATION_NUMBER_TYPE";
     private final static String APPLICATION_DATE = "APPLICATION_DATE";
     private final static String APPLICATION_STATUS_TYPE = "APPLICATION_STATUS_TYPE";
-    private final static String APPLICATION_TYPE_QUERY = "APPLICATION_TYPE_QUERY";
-    private final static String APPLICATION_TYPE_QUERY_MODE = "APPLICATION_TYPE_QUERY_MODE";
-    private final static String APPLICATION_TYPE_QUERY_CUSTOM_MONTHS = "APPLICATION_TYPE_QUERY_CUSTOM_MONTHS";
+
+    private final static String WAITING_TIME_TYPE_QUERY = "WAITING_TIME_TYPE_QUERY";
+    private final static String WAITING_TIME_TYPE_QUERY_MODE = "WAITING_TIME_TYPE_QUERY_MODE";
+    private final static String WAITING_TIME_QUERY_CUSTOM_MONTHS = "WAITING_TIME_QUERY_CUSTOM_MONTHS";
+    private final static String WAITING_TIME_LOW_MONTH = "WAITING_TIME_LOW_MONTH";
+    private final static String WAITING_TIME_HIGH_MONTH = "WAITING_TIME_HIGH_MONTH";
+    private final static String WAITING_TIME_UPDATED_AT = "WAITING_TIME_UPDATED_AT";
+
+
+
     private final static String APP_BACKGROUND_INDEX = "APP_BACKGROUND_INDEX";
-    private final static String PREFERENCE_KEY = MainActivity.APPLICATION_KEY + ".";
-
-
 
     private final static String VERSION_KEY = "VERSION_KEY";
 
-    private static final long APP_VERSION = 1L;
+    private static final long APP_VERSION = 2L;
 
 
     private static DataStorage dataStorage;
@@ -47,115 +52,125 @@ public class DataStorage {
         return preferences.getInt(APP_BACKGROUND_INDEX, 0);
     }
 
-    public void storeBackgroundIndex(Context context, int index) {
+    public void saveBackgroundIndex(Context context, int index) {
         SharedPreferences preferences = getSharedPreference(context);
         preferences.edit().putInt(APP_BACKGROUND_INDEX, index).apply();
     }
 
-    public Application loadApplication(Context context) throws NoApplicationException{
-        SharedPreferences preferences = getSharedPreference(context);
-        try {
-            int applicationNumber = preferences.getInt(APPLICATION_NUMBER_KEY, -1);
-            long applicationDateMS = preferences.getLong(APPLICATION_DATE, 0);
-            if (applicationDateMS == 0) {
-                throw new NoApplicationException();
-            }
-            if(applicationNumber == -1){
-                return new Application(applicationDateMS);
-            }
-            int applicationTypeNumber = preferences.getInt(APPLICATION_NUMBER_TYPE, -1);
-            if (applicationTypeNumber != 1 && applicationTypeNumber != 2) {
-                throw new NoApplicationException();
-            }
-            int status = preferences.getInt(APPLICATION_STATUS_TYPE, -1);
-            if (status != 0 && status != 1 && status != 2) {
-                throw new NoApplicationException();
-            }
-            return new Application(context, StatusType.statusNumberToStatusType(status), applicationDateMS,
-                    applicationNumber, ApplicationNumberType.numberToNumberType(applicationTypeNumber));
 
-        } catch (Exception e) {
-            throw new NoApplicationException();
-        }
-    }
-
-    public boolean saveWaitingTimeQuery(Context context, String query) {
-        SharedPreferences preferences = getSharedPreference(context);
-        try {
-            preferences.edit().
-                    putBoolean(APPLICATION_TYPE_QUERY_MODE, false).
-                    putString(APPLICATION_TYPE_QUERY, query).apply();
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    public boolean saveApplicationNotUseApplicationNumber(Context context,long applicationDate) {
-        return saveApplication(context, new Application(applicationDate));
-    }
-
-    public boolean saveWaitingTimeDataStoragePacket(Context context, WaitingTime waitingTime) {
+    boolean saveWaitingTimeDataStoragePacket(Context context, WaitingTime waitingTime) {
         if (waitingTime == null) {
             return false;
         }
         SharedPreferences preferences = getSharedPreference(context);
         try {
             preferences.edit().
-                    putBoolean(APPLICATION_TYPE_QUERY_MODE, waitingTime.isUseCustomMonths()).
-                    putInt(APPLICATION_TYPE_QUERY_CUSTOM_MONTHS, waitingTime.getCustomMonths()).
-                    putString(APPLICATION_TYPE_QUERY, waitingTime.getQuery()).apply();
+                    putBoolean(WAITING_TIME_TYPE_QUERY_MODE, waitingTime.isUseCustomMonths()).
+                    putInt(WAITING_TIME_QUERY_CUSTOM_MONTHS, waitingTime.getCustomMonths()).
+                    putString(WAITING_TIME_TYPE_QUERY, waitingTime.getQuery()).apply();
             return true;
         } catch (Exception e) {
             return false;
         }
     }
 
-    public boolean saveApplication(Context context, Application application) {
-        if (application == null) {
+    boolean saveWaitingTime(Context context, WaitingTime waitingTime) {
+        SharedPreferences preferences = getSharedPreference(context);
+        if (waitingTime == null) {
             return false;
         }
         try {
-            SharedPreferences preferences = getSharedPreference(context);
-            int applicationNumber, applicationNumberType, applicationStatus;
-            long applicationDate = application.getApplicationDate();
-            try {
-                applicationNumber = application.getApplicationNumber().getApplicationNumber();
-                applicationNumberType = application.getApplicationNumber().getApplicationNumberType().getMigrationsverketQueryNumber();
-                applicationStatus = application.getApplicationStatus().getStatusType().getNumber();
-            } catch (NoApplicationNumberException e) {
-                applicationNumber = -1;
-                applicationNumberType = -1;
-                applicationStatus = StatusType.PRIVACY_MODE.getNumber();
-            }
             preferences.edit().
-                    putInt(APPLICATION_NUMBER_KEY, applicationNumber).
-                    putInt(APPLICATION_NUMBER_TYPE, applicationNumberType).
-                    putInt(APPLICATION_STATUS_TYPE, applicationStatus).
-                    putLong(APPLICATION_DATE, applicationDate).
-                    apply();
-            if (application.getWaitingTime() != null) {
-                saveWaitingTimeDataStoragePacket(context, application.getWaitingTime());
-            }
+                    putBoolean(WAITING_TIME_TYPE_QUERY_MODE, waitingTime.isUseCustomMonths()).
+                    putInt(WAITING_TIME_QUERY_CUSTOM_MONTHS, waitingTime.getCustomMonths()).
+                    putInt(WAITING_TIME_LOW_MONTH, waitingTime.getLowMonth()).
+                    putInt(WAITING_TIME_HIGH_MONTH, waitingTime.getHighMonth()).
+                    putString(WAITING_TIME_TYPE_QUERY, waitingTime.getQuery()).
+                    putString(WAITING_TIME_UPDATED_AT,waitingTime.getUpdatedAtDate()).apply();
+            return true;
         } catch (Exception e) {
             return false;
         }
-        return true;
     }
 
-    public WaitingTimeDataStoragePacket loadWaitingTime(Context context) throws NoWaitingTimeException{
+    WaitingTime loadWaitingTime(Context context) throws NoWaitingTimeException{
         SharedPreferences preferences = getSharedPreference(context);
-        String applicationTypeQuery = preferences.getString(APPLICATION_TYPE_QUERY, "");
-        int applicationTypeCustomMonths = preferences.getInt(APPLICATION_TYPE_QUERY_CUSTOM_MONTHS, 0);
-        boolean applicationTypeCustomMonthsUseCustomMode = preferences.getBoolean(APPLICATION_TYPE_QUERY_MODE, false);
-        if (isInvalidWaitingTime(applicationTypeQuery,applicationTypeCustomMonths,applicationTypeCustomMonthsUseCustomMode)) {
+        String waitingTimeQuery = preferences.getString(WAITING_TIME_TYPE_QUERY, "");
+        Log.d(MainActivity.LOG_KEY, "Waiting time query = " + waitingTimeQuery);
+        int customMonths = preferences.getInt(WAITING_TIME_QUERY_CUSTOM_MONTHS, 0);
+        Log.d(MainActivity.LOG_KEY, "custom months = " + customMonths);
+        int highMonth = preferences.getInt(WAITING_TIME_HIGH_MONTH, -1);
+        Log.d(MainActivity.LOG_KEY,"high month = " + highMonth);
+        int lowMonth = preferences.getInt(WAITING_TIME_LOW_MONTH, -1);
+        Log.d(MainActivity.LOG_KEY,"low month = " + lowMonth);
+        String updatedAt = preferences.getString(WAITING_TIME_UPDATED_AT, "");
+        Log.d(MainActivity.LOG_KEY,"updated at = " + updatedAt);
+        boolean useCustomMode = preferences.getBoolean(WAITING_TIME_TYPE_QUERY_MODE, false);
+        Log.d(MainActivity.LOG_KEY,"use custom mode = " + useCustomMode);
+        if (isInvalidWaitingTime(waitingTimeQuery,customMonths,useCustomMode)) {
             throw new NoWaitingTimeException();
         }
-        return new WaitingTimeDataStoragePacket(applicationTypeQuery, applicationTypeCustomMonthsUseCustomMode, applicationTypeCustomMonths);
+        if (waitingTimeQuery.isEmpty()) {
+            return new WaitingTime(customMonths);
+        }
+        Log.d(MainActivity.LOG_KEY, "query is = " + waitingTimeQuery);
+        return new WaitingTime(lowMonth, highMonth, updatedAt, waitingTimeQuery, useCustomMode, customMonths);
     }
 
     private boolean isInvalidWaitingTime(String query, int customMonth, boolean useCustomMonth) {
         return (query.isEmpty() && !useCustomMonth) || (customMonth == 0 && useCustomMonth);
+    }
+
+    boolean saveApplication(Context context, Application application) {
+        SharedPreferences preferences = getSharedPreference(context);
+        if (application == null) {
+            return false;
+        }
+        try {
+            if (application.isHasApplicationNumber()) {
+                preferences.edit().
+                        putInt(APPLICATION_NUMBER_KEY, application.getApplicationNumber().getApplicationNumber()).
+                        putInt(APPLICATION_NUMBER_TYPE, application.getApplicationNumber().getApplicationNumberType().getMigrationsverketQueryNumber()).
+                        putLong(APPLICATION_DATE, application.getApplicationDate()).
+                        putInt(APPLICATION_STATUS_TYPE, application.getApplicationStatus().getStatusType().getNumber()).
+                        apply();
+            } else {
+                preferences.edit().
+                        putLong(APPLICATION_DATE, application.getApplicationDate()).
+                        apply();
+            }
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    Application loadApplication(Context context) throws NoApplicationException{
+        SharedPreferences preferences = getSharedPreference(context);
+        try {
+            long applicationDate = preferences.getLong(APPLICATION_DATE, -1);
+            Log.d(MainActivity.LOG_KEY, "application date: " + applicationDate);
+            if (applicationDate != -1) {
+                int applicationNumber = preferences.getInt(APPLICATION_NUMBER_KEY, -1);
+                Log.d(MainActivity.LOG_KEY, "application number = " + applicationNumber);
+                if (applicationNumber == -1) {
+                    return new Application(applicationDate);
+                }
+                int applicationNumberType = preferences.getInt(APPLICATION_NUMBER_TYPE, -1);
+                Log.d(MainActivity.LOG_KEY, "number type = " + applicationNumberType);
+                int applicationStatusNumber = preferences.getInt(APPLICATION_STATUS_TYPE, -1);
+                Log.d(MainActivity.LOG_KEY, "status number = " + applicationStatusNumber);
+                if (applicationNumberType != -1 && applicationStatusNumber != -1) {
+                    return new Application(
+                            StatusType.statusNumberToStatusType(applicationStatusNumber),
+                            applicationDate, applicationNumber,
+                            ApplicationNumberType.numberToNumberType(applicationNumberType));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        throw new NoApplicationException();
     }
 
 
@@ -163,7 +178,7 @@ public class DataStorage {
         return context.getSharedPreferences(MainActivity.APPLICATION_KEY, Context.MODE_PRIVATE);
     }
 
-    public boolean firstTimeNewVersion(Context context) {
+    private boolean firstTimeNewVersion(Context context) {
         boolean returnValue = true;
         try {
             SharedPreferences preferences = getSharedPreference(context);
@@ -178,20 +193,29 @@ public class DataStorage {
         return returnValue;
     }
 
+    public void checkVersionResetIfNeeded(Context context) {
+        if (firstTimeNewVersion(context)) {
+            deleteAllData(context);
+        }
+    }
+
     private void saveVersion(Context context) {
         getSharedPreference(context).edit().putLong(VERSION_KEY, APP_VERSION).apply();
     }
 
-    public void deleteAllData(Context context) {
+    void deleteAllData(Context context) {
         getSharedPreference(context).edit().clear().apply();
     }
 
-    public void deleteWaitingTime(Context context) {
+    void deleteWaitingTime(Context context) {
         SharedPreferences preferences = getSharedPreference(context);
         preferences.edit().
-                remove(APPLICATION_TYPE_QUERY_MODE).
-                remove(APPLICATION_TYPE_QUERY_CUSTOM_MONTHS).
-                remove(APPLICATION_TYPE_QUERY).apply();
+                remove(WAITING_TIME_TYPE_QUERY_MODE).
+                remove(WAITING_TIME_QUERY_CUSTOM_MONTHS).
+                remove(WAITING_TIME_LOW_MONTH).
+                remove(WAITING_TIME_UPDATED_AT).
+                remove(WAITING_TIME_HIGH_MONTH).
+                remove(WAITING_TIME_TYPE_QUERY).apply();
     }
 
 }

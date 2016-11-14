@@ -15,8 +15,8 @@ public class Application{
 
     private boolean hasApplicationNumber;
 
-    public Application(Context context, StatusType status, long applicationDate, Integer applicationNumber, ApplicationNumberType applicationNumberType) {
-        this.applicationStatus = new ApplicationStatus(context, status.getNumber());
+    public Application(StatusType status, long applicationDate, Integer applicationNumber, ApplicationNumberType applicationNumberType) {
+        this.applicationStatus = new ApplicationStatus(status.getNumber());
         this.applicationDate = new ApplicationDate(applicationDate);
         this.applicationNumber = new ApplicationNumber(applicationNumber, applicationNumberType);
         hasApplicationNumber = true;
@@ -43,6 +43,11 @@ public class Application{
     public synchronized OldAndNewWaitingTimeWrapper setWaitingTimeReturnBothIfNewer(WaitingTime waitingTime) {
         if (this.waitingTime != null) {
             int newer = WaitingTime.WaitingTimeUpdatedDateComparator.compare(this.waitingTime, waitingTime);
+            int customMonths = this.waitingTime.getCustomMonths();
+            boolean customMonthsMode = this.waitingTime.isUseCustomMonths();
+            if (customMonthsMode) {
+                waitingTime.setUseCustomMonthsMode(customMonths);
+            }
             if(newer == -1){
                 OldAndNewWaitingTimeWrapper ret = new OldAndNewWaitingTimeWrapper(this.waitingTime, waitingTime);
                 this.waitingTime = waitingTime;
@@ -71,12 +76,22 @@ public class Application{
         return applicationNumber;
     }
 
-    public void newStatusType(StatusType statusType) {
-        try {
-            getApplicationStatus().setStatus(statusType.getNumber());
-        } catch (NoApplicationNumberException e) {
-            //ignore
+    public boolean newStatusTypeReturnTrueIfFromWaitingToFinish(StatusType statusType) {
+        if (hasApplicationNumber) {
+            try {
+                if (getApplicationStatus().getStatusType().getNumber() == 1
+                        && statusType.getNumber() == 2) {
+                    //new status is finished. extremely important to update user
+                    getApplicationStatus().setStatus(statusType.getNumber());
+                    return true;
+                }
+                getApplicationStatus().setStatus(statusType.getNumber());
+            } catch (NoApplicationNumberException e) {
+                e.printStackTrace();
+                // will never happen
+            }
         }
+        return false;
     }
 
     public class OldAndNewWaitingTimeWrapper {

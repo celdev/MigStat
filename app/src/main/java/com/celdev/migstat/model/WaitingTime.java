@@ -4,42 +4,47 @@ import com.celdev.migstat.controller.utils.DateUtils;
 
 import java.util.Comparator;
 
-public class WaitingTime {
+public class WaitingTime implements WaitingTimeInterface {
 
-    public enum DayOrMonth{
-        DAY(true),
-        MONTH(false);
 
-        DayOrMonth(boolean day) {
-        }
-    }
 
-    public static DayOrMonth isDayMode(boolean mode) {
-        return mode ? DayOrMonth.DAY : DayOrMonth.MONTH;
-    }
 
-    private int lowMonth, highMonth;
-    private int days;
+    private int lowMonth = -1, highMonth = -1;
     private String updatedAtDate;
-    private DayOrMonth dayOrMonth;
-    private int customMonths;
+    private int customMonths = 0;
     private boolean useCustomMonths;
 
     private String query;
 
     public WaitingTime(int lowMonth, int highMonth, String updatedAtDate, String query) {
-        this.dayOrMonth = DayOrMonth.MONTH;
         this.lowMonth = lowMonth;
         this.highMonth = highMonth;
         this.updatedAtDate = updatedAtDate;
         this.query = query;
     }
 
-    //returns true if lowMonth == highMonth, waiting time is in days or using custom months mode
+    public WaitingTime(int lowMonth, int highMonth, String updatedAtDate, String query, boolean useCustomMonths, int customMonths) {
+        this(lowMonth, highMonth, updatedAtDate, query);
+        this.useCustomMonths = useCustomMonths;
+        this.customMonths = customMonths;
+    }
+
+    public WaitingTime(int customMonths) {
+        this.customMonths = customMonths;
+        this.updatedAtDate = "";
+        this.useCustomMonths = true;
+    }
+
+    public boolean hasQuery() {
+        return query != null && !query.isEmpty();
+    }
+
+    //returns true if lowMonth == highMonth, or if useCustomMonths is set
     //is set
     public boolean lowMonthAndHighMonthIsEqual() {
-        return useCustomMonths || highMonth == lowMonth || dayOrMonth.equals(DayOrMonth.DAY);
+        return useCustomMonths || highMonth == lowMonth;
     }
+
 
     public WaitingTime setUseCustomMonthsMode(int customMonths) {
         this.customMonths = customMonths;
@@ -55,16 +60,13 @@ public class WaitingTime {
         return customMonths;
     }
 
-    public void disableCustomMonthsMode() {
+    public void disableCustomMonthsMode() throws IllegalWaitingTimeStateException {
+        if (lowMonth == -1 && highMonth == -1) {
+            throw new IllegalWaitingTimeStateException();
+        }
         this.useCustomMonths = false;
     }
 
-    public WaitingTime(int days, String updatedAtDate, String query) {
-        this.days = days;
-        this.dayOrMonth = DayOrMonth.DAY;
-        this.updatedAtDate = updatedAtDate;
-        this.query = query;
-    }
 
     public int getLowMonth() {
         return lowMonth;
@@ -77,9 +79,6 @@ public class WaitingTime {
     public double getAverage() {
         if (useCustomMonths) {
             return customMonths;
-        }
-        if (dayOrMonth.equals(DayOrMonth.DAY)) {
-            return days;
         }
         return (highMonth + lowMonth) / 2.0;
     }
@@ -104,9 +103,7 @@ public class WaitingTime {
         return "WaitingTime{" +
                 "lowMonth=" + lowMonth +
                 ", highMonth=" + highMonth +
-                ", days=" + days +
                 ", updatedAtDate='" + updatedAtDate + '\'' +
-                ", dayOrMonth=" + dayOrMonth +
                 ", average= " + getAverage() +
                 ", query= " + query +
                 '}';

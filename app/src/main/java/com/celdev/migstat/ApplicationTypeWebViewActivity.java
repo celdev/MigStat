@@ -14,18 +14,23 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Toast;
 
+import com.celdev.migstat.controller.Controller;
 import com.celdev.migstat.controller.DataStorage;
 import com.celdev.migstat.view.CustomAboutDialog;
+import com.celdev.migstat.view.ViewInterface;
 
 
-public class ApplicationTypeWebViewActivity extends AppCompatActivity {
+public class ApplicationTypeWebViewActivity extends AppCompatActivity implements ViewInterface {
 
     public static final String SWEDISH_PAGE_URL = "http://www.migrationsverket.se/Kontakta-oss/Tid-till-beslut.html";
     public static final String ENGLISH_PAGE_URL = "http://www.migrationsverket.se/English/Contact-us/Time-to-a-decision.html";
 
     private ProgressDialog progressDialog;
     private String url;
+
+    private Controller controller = Controller.getInstance(this, this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +67,20 @@ public class ApplicationTypeWebViewActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void modelChange(ModelChange modelChange) {
+        progressDialog.dismiss();
+        switch (modelChange) {
+            case WAITING_TIME_OK:
+                moveToNextActivity();
+                return;
+            case ERROR_UPDATE:
+            case MULTIPLE_WAITING_TIME:
+                Toast.makeText(this, R.string.not_implemented_yet, Toast.LENGTH_LONG).show();
+                return;
+        }
+    }
+
     private void showWhatToDoDialog() {
         new AlertDialog.Builder(this).setMessage(R.string.what_to_do_message).setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             @Override
@@ -79,8 +98,13 @@ public class ApplicationTypeWebViewActivity extends AppCompatActivity {
         @Override
         public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
             if (requestIsSendQuery("" + request.getUrl())) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        initProgressDialog();
+                    }
+                });
                 saveQuery("" + request.getUrl());
-                moveToNextActivity();
             }
             return super.shouldInterceptRequest(view, request);
         }
@@ -129,7 +153,7 @@ public class ApplicationTypeWebViewActivity extends AppCompatActivity {
     /*  Stores the url to the page containing the average waiting time
     * */
     private void saveQuery(String query) {
-        DataStorage.getInstance().saveWaitingTimeQuery(this, query);
+        controller.handleWaitingTimeQuery(query);
     }
 
     /*  Transfers the user to the next Activity (ShowStatus)
@@ -146,6 +170,12 @@ public class ApplicationTypeWebViewActivity extends AppCompatActivity {
         return true;
     }
 
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        controller = Controller.getInstance(this, this);
+    }
 
 
     @Override

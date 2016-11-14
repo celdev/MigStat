@@ -36,8 +36,6 @@
     <string name="reload_button">Reload status</string>
     <string name="error_reload">Error reloading status</string>
     <string name="new_waiting_time_message">The Swedish Migration Agency have updated the estimated waiting time.
-        \nOld estimate: %1$d-%2$d months
-        \nNew estimate: %3$d-%4$d months
     </string>
     <string name="refreshed_status">Refreshed Application Status</string>
     <string name="estimated_months_placeholder">%1$d-%2$d months</string>
@@ -80,5 +78,6 @@
     <string name="use_custom_waiting_time">Set custom waiting time</string>
     <string name="cancel">Cancel</string>
     <string name="choose_months">Choose custom waiting time in months</string>
+    <string name="not_implemented_yet">This type of waiting time isn\'t implemented yet</string>
 
 </resources>

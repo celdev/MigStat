@@ -48,7 +48,7 @@ public class BackgroundChanger {
             ImageButton nextBtn = (ImageButton) linearLayout.findViewById(R.id.change_bg_next);
             Button okBtn = (Button) linearLayout.findViewById(R.id.change_bg_ok);
             initButtons(backBtn, nextBtn, okBtn);
-            parent.addView(linearLayout);
+            //parent.addView(linearLayout);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -97,7 +97,7 @@ public class BackgroundChanger {
     }
 
     private void saveNewBackground() {
-        DataStorage.getInstance().storeBackgroundIndex(activity, currentBG);
+        DataStorage.getInstance().saveBackgroundIndex(activity, currentBG);
     }
 
 }

@@ -1,6 +1,6 @@
 package com.celdev.migstat.controller;
 
-public class NoWaitingTimeException extends Exception {
+public class NoWaitingTimeException extends DataStorageLoadException {
 
     public NoWaitingTimeException() {
     }

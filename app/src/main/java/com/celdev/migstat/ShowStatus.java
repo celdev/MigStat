@@ -23,7 +23,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.celdev.migstat.controller.ApplicationStatusChecker;
+import com.celdev.migstat.controller.Controller;
 import com.celdev.migstat.controller.DataStorage;
+import com.celdev.migstat.controller.DataStorageLoadException;
 import com.celdev.migstat.controller.NoApplicationException;
 import com.celdev.migstat.controller.NoWaitingTimeException;
 import com.celdev.migstat.controller.WaitingTimeDataStoragePacket;
@@ -32,10 +34,12 @@ import com.celdev.migstat.controller.parser.AsyncTaskResultReceiver;
 import com.celdev.migstat.controller.parser.SimpleCaseStatusParser;
 import com.celdev.migstat.controller.utils.DateUtils;
 import com.celdev.migstat.model.Application;
+import com.celdev.migstat.model.NoApplicationNumberException;
 import com.celdev.migstat.model.WaitingTime;
 import com.celdev.migstat.view.BackgroundChanger;
 import com.celdev.migstat.view.CustomAboutDialog;
 import com.celdev.migstat.view.CustomNewWaitingTimeDialog;
+import com.celdev.migstat.view.ViewInterface;
 import com.celdev.migstat.view.ViewUpdateReceiver;
 
 import java.text.DecimalFormat;
@@ -43,7 +47,7 @@ import java.text.DecimalFormatSymbols;
 import java.util.Date;
 import java.util.Locale;
 
-public class ShowStatus extends AppCompatActivity {
+public class ShowStatus extends AppCompatActivity implements ViewInterface {
 
     private Application application;
     private ProgressBar progressBar;
@@ -62,6 +66,8 @@ public class ShowStatus extends AppCompatActivity {
     private long timeWhenLastUpdatedStatus = 0;
     private long timeWhenLastUpdatedWaitingTime = 0;
 
+    private Controller controller = Controller.getInstance(this, this);
+
     private static final long UPDATE_MS_TRESHHOLD = 1800000; //30 minutes
 
     @Override
@@ -74,23 +80,80 @@ public class ShowStatus extends AppCompatActivity {
         changeBackground();
         try {
             loadApplication();
-        } catch (NoApplicationException | NoWaitingTimeException e) {
+        } catch (DataStorageLoadException e) {
             e.printStackTrace();
             returnToMainActivityBecauseError(R.string.alpha_incorrect_state,true);
         }
         initButtonFunctionality();
-        removeRefreshButtonIfNoApplicationNumberAndNoWaitingTimeQuery();
     }
 
-    /*  If the application doesn't have an application number
-    *   and doesn't have a "application type" query (created in the webview)
-    *   updating the waiting time and status does nothing
-    * */
-    private void removeRefreshButtonIfNoApplicationNumberAndNoWaitingTimeQuery() {
-        if (!application.isHasApplicationNumber() &&
-                application.getWaitingTime() != null &&
-                application.getWaitingTime().getQuery().isEmpty()) {
-            progressBarFrame.removeView(refreshButton);
+    @Override
+    public void modelChange(ModelChange modelChange) {
+        disableRefreshAnimation();
+        switch (modelChange) {
+            case APPLICATION:
+                processUpdateApplication();
+                break;
+            case WAITING_TIME:
+                processUpdateWaitingTime();
+                break;
+            case ERROR_UPDATE:
+                /* returned when something went wrong with parsing, shouldn't happen since
+                 * since the application should return to the MainActivity if the information
+                 * is incorrect.
+                 * Could happen if Migrationsverket alter their website
+                 */
+                break;
+            case NEW_WAITING_TIME:
+                //returned when the new waiting time have a newer "updated at" then before
+                processUpdateWaitingTime();
+                handleCheckOldNewWaitingTime();
+                break;
+            case JUST_FINISHED:
+                //returned when application goes from waiting to decision
+                break;
+            default:
+                processUpdateApplication();
+                processUpdateWaitingTime();
+                Log.d(MainActivity.LOG_KEY, "got other model change enum" + modelChange.name());
+        }
+    }
+
+    private void processUpdateApplication() {
+        Log.d(MainActivity.LOG_KEY, "updating progress from application progressUpdateApplication");
+        try {
+            if (application == null) {
+                application = controller.getApplication();
+            }
+            setApplicationViewInformation();
+            if (application.isHasApplicationNumber()) {
+                try {
+                    applicationStatusText.setText(getResources().getStringArray(R.array.case_status_types)[application.getApplicationStatus().getStatusType().getNumber()]);
+                } catch (NoApplicationNumberException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                applicationStatusText.setText("");
+            }
+        } catch (DataStorageLoadException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void processUpdateWaitingTime() {
+
+        try {
+            WaitingTime waitingTime = controller.getWaitingTime();
+            estimatedMonthsText.setText(waitingTime.lowMonthAndHighMonthIsEqual()?
+                    getString(R.string.estimated_months_placeholder_single_month,(int)waitingTime.getAverage()) :
+                    getString(R.string.estimated_months_placeholder, waitingTime.getLowMonth(), waitingTime.getHighMonth()));
+            refreshProgressThread();
+            daysToDecisionText.setText("" + DateUtils.daysUntilDecision(
+                    DateUtils.addAverageMonthsToDate(
+                            application.getApplicationDate(),
+                            waitingTime.getAverage())));
+        } catch (DataStorageLoadException e) {
+            e.printStackTrace();
         }
     }
 
@@ -110,7 +173,7 @@ public class ShowStatus extends AppCompatActivity {
         ani.setRepeatMode(Animation.RESTART);
         refreshButton.startAnimation(ani);
         refreshButton.setEnabled(false);
-        new ApplicationStatusChecker(refreshStatusReceiver).checkApplication(application);
+        controller.updateApplicationAndWaitingTime();
     }
 
     private void initViews() {
@@ -127,43 +190,15 @@ public class ShowStatus extends AppCompatActivity {
         daysToDecisionText = (TextView) findViewById(R.id.avg_days_to_decision_number);
     }
 
-    private ViewUpdateReceiver refreshStatusReceiver = new ViewUpdateReceiver() {
-        @Override
-        public void receiveUpdate(Object object) {
-            disableRefreshAnimation();
-            if (object == null) {
-                Toast.makeText(ShowStatus.this, R.string.error_reload, Toast.LENGTH_LONG).show();
-            }
-            if (object instanceof SimpleCaseStatusParser.StatusAndDate) {
-                timeWhenLastUpdatedStatus = System.currentTimeMillis();
-                SimpleCaseStatusParser.StatusAndDate statusAndDate = (SimpleCaseStatusParser.StatusAndDate) object;
-                Log.d(MainActivity.LOG_KEY, "received status update" + statusAndDate.toString());
-                Toast.makeText(ShowStatus.this, R.string.refreshed_status, Toast.LENGTH_SHORT).show();
-                int index = statusAndDate.getStatusType().getNumber();
-                if (index >= 0 && index < 3) {
-                    applicationStatusText.setText(getResources().getStringArray(R.array.case_status_types)[index]);
-                } else {
-                    applicationStatusText.setText("");
-                }
-            }
-        }
-    };
-
-    private void loadApplication() throws NoApplicationException, NoWaitingTimeException {
-        application = DataStorage.getInstance().loadApplication(this);
-        setApplicationViewInformation();
-        WaitingTimeDataStoragePacket waitingTimeDataStoragePacket = DataStorage.getInstance().loadWaitingTime(this);
-        if (waitingTimeDataStoragePacket.isCustomMode()) {
-            application.setWaitingTimeReturnBothIfNewer(
-                    new WaitingTime(waitingTimeDataStoragePacket.getCustomMonths(),
-                            waitingTimeDataStoragePacket.getCustomMonths(),
-                            DateUtils.msToDateString(System.currentTimeMillis()), ""));
-        } else {
-            new WebViewResponseParser(waitingTimeDataStoragePacket.getQuery(), waitingTimeReceiver);
-        }
+    private void loadApplication() throws DataStorageLoadException {
+        controller.loadAll();
+        application = controller.getApplication();
+        controller.updateWaitingTime();
+        controller.updateApplication();
     }
 
     private void setApplicationViewInformation() {
+        Log.d(MainActivity.LOG_KEY, "updating progress from application");
         applicationDateTextView.setText(DateUtils.msToDateString(application.getApplicationDate()));
         daysSinceApplicationText.setText("" + DateUtils.daysWaited(application.getApplicationDate()));
     }
@@ -177,29 +212,9 @@ public class ShowStatus extends AppCompatActivity {
     }
 
 
-    private AsyncTaskResultReceiver waitingTimeReceiver = new AsyncTaskResultReceiver() {
-        @Override
-        public void receiveResult(Object object) {
-            if (object instanceof WaitingTime) {
-                timeWhenLastUpdatedWaitingTime = System.currentTimeMillis();
-                WaitingTime waitingTime = (WaitingTime) object;
-                handleCheckOldNewWaitingTime(application.setWaitingTimeReturnBothIfNewer(waitingTime));
-                estimatedMonthsText.setText(waitingTime.lowMonthAndHighMonthIsEqual()?
-                        getString(R.string.estimated_months_placeholder_single_month,waitingTime.getAverage()) :
-                        getString(R.string.estimated_months_placeholder, waitingTime.getLowMonth(), waitingTime.getHighMonth()));
-                refreshProgressThread();
-                daysToDecisionText.setText("" + DateUtils.daysUntilDecision(
-                        DateUtils.addAverageMonthsToDate(
-                                application.getApplicationDate(),
-                                waitingTime.getAverage())));
-            }
-        }
-    };
 
-    private void handleCheckOldNewWaitingTime(Application.OldAndNewWaitingTimeWrapper oldNew) {
-        if (oldNew != null) {
-            new CustomNewWaitingTimeDialog(this, oldNew).create().show();
-        }
+    private void handleCheckOldNewWaitingTime() {
+        new CustomNewWaitingTimeDialog(this).create().show();
     }
 
     private void refreshProgressThread() {
@@ -207,7 +222,12 @@ public class ShowStatus extends AppCompatActivity {
             progressBarUpdaterThread.kill();
             progressBarUpdaterThread = null;
         }
-        progressBarUpdaterThread = new ProgressBarUpdaterThread(application.getApplicationDate(),application.getWaitingTime().getAverage());
+        try {
+            WaitingTime waitingTime = controller.getWaitingTime();
+            progressBarUpdaterThread = new ProgressBarUpdaterThread(application.getApplicationDate(),waitingTime.getAverage());
+        } catch (DataStorageLoadException e) {
+            e.printStackTrace();
+        }
     }
 
     /*  This method is called before the application enters the onPaused state
@@ -247,13 +267,15 @@ public class ShowStatus extends AppCompatActivity {
             fromOnCreate = false;
             return;
         }
+        controller = Controller.getInstance(this, this);
         if (application != null && application.getWaitingTime() != null) {
             refreshProgressThread();
         } else {
             try {
                 loadApplication();
                 refreshProgressThread();
-            } catch (NoApplicationException | NoWaitingTimeException e) {
+            } catch (DataStorageLoadException e) {
+                e.printStackTrace();
                 Log.d(MainActivity.LOG_KEY, "Incorrect state, application or waiting time is null");
                 returnToMainActivityBecauseError(R.string.alpha_incorrect_state, true);
             }
@@ -265,15 +287,15 @@ public class ShowStatus extends AppCompatActivity {
     * */
     private void returnToMainActivityBecauseError(@StringRes int message, boolean shouldResetAllData) {
         if (shouldResetAllData) {
-            DataStorage.getInstance().deleteAllData(this);
+            controller.deleteAll();
         }
         new AlertDialog.Builder(this).setMessage(message).setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
-                startActivity(new Intent(ShowStatus.this, MainActivity.class));
             }
         }).create().show();
+        startActivity(new Intent(ShowStatus.this, MainActivity.class));
     }
 
     /*  This thread will handle the updating of the progressbar
@@ -328,12 +350,7 @@ public class ShowStatus extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (application != null) {
-            DataStorage.getInstance().saveApplication(this, application);
-            if (application.getWaitingTime() != null) {
-                DataStorage.getInstance().saveWaitingTimeDataStoragePacket(this, application.getWaitingTime());
-            }
-        }
+        controller.saveAll();
     }
 
     @Override
@@ -347,53 +364,6 @@ public class ShowStatus extends AppCompatActivity {
         return super.onKeyDown(keyCode, event);
     }
 
-    private class UpdateStatusAndWaitingTimeReceiver implements ViewUpdateReceiver, AsyncTaskResultReceiver {
-
-        private ViewUpdateReceiver viewUpdateReceiver;
-        private AsyncTaskResultReceiver asyncTaskResultReceiver;
-        private boolean receivedWaitingTime = false, receivedStatus = false;
-
-        private Object waitingTimeResult, statusResult;
-
-        public UpdateStatusAndWaitingTimeReceiver(ViewUpdateReceiver viewUpdateReceiver, AsyncTaskResultReceiver asyncTaskResultReceiver) {
-            this.viewUpdateReceiver = viewUpdateReceiver;
-            this.asyncTaskResultReceiver = asyncTaskResultReceiver;
-        }
-
-        private synchronized void pushToOuterClassIfReceivedBoth() {
-            if (receivedWaitingTime && receivedStatus) {
-                viewUpdateReceiver.receiveUpdate(statusResult);
-                asyncTaskResultReceiver.receiveResult(waitingTimeResult);
-            }
-        }
-
-        private synchronized void setReceived(boolean setReceivedStatus) {
-            if (setReceivedStatus) {
-                receivedStatus = true;
-            } else {
-                receivedWaitingTime = true;
-            }
-        }
-
-        @Override
-        public void receiveResult(Object object) {
-            //waitingtime
-            setReceived(false);
-            waitingTimeResult = object;
-        }
-
-        @Override
-        public void receiveUpdate(Object object) {
-            //status
-            setReceived(true);
-            statusResult = object;
-        }
-
-        public void check() {
-            new ApplicationStatusChecker(this).checkApplication(application);
-            new WebViewResponseParser(application.getWaitingTime().getQuery(), this);
-        }
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -418,7 +388,7 @@ public class ShowStatus extends AppCompatActivity {
                 setChangeBackgroundMode();
                 return true;
             case R.id.menu_reset_application:
-                DataStorage.getInstance().deleteAllData(this);
+                controller.deleteAll();
                 startActivity(new Intent(this, MainActivity.class));
             default:
                 return super.onOptionsItemSelected(item);

@@ -27,28 +27,28 @@ public class WebViewResponseParser {
 
     private static final String NOT_COMPLEX = "not_complex";
 
-    public WebViewResponseParser(String query, AsyncTaskResultReceiver asyncTaskResultReceiver) {
+    public WebViewResponseParser(String query, AsyncCallback asyncCallback) {
         String parserType = returnComplexString(query);
         if (query.trim().isEmpty()) {
-            asyncTaskResultReceiver.receiveResult(null);
+            asyncCallback.receiveAsyncResult(AsyncCallbackErrorObject.NO_WAITINGTIME_QUERY);
         }
         switch (parserType) {
             case NOT_COMPLEX:
                 Log.d(MainActivity.LOG_KEY, "Using not complex parser");
-                new MonthsWaitingTimeParser(asyncTaskResultReceiver).execute(query);
+                new MonthsWaitingTimeParser(asyncCallback).execute(query);
                 break;
             default:
                 Log.d(MainActivity.LOG_KEY, "Using complex parser");
-                WaitingTimeParser waitingTimeParser = ComplexWaitingTimeParsers.getCorrectWaitingTimeParser(parserType, asyncTaskResultReceiver);
+                WaitingTimeParser waitingTimeParser = ComplexWaitingTimeParsers.getCorrectWaitingTimeParser(parserType, asyncCallback);
                 if (waitingTimeParser != null) {
                     waitingTimeParser.execute(query);
                 } else {
-                    asyncTaskResultReceiver.receiveResult(null);
+                    asyncCallback.receiveAsyncResult(AsyncCallbackErrorObject.PARSER_EXCEPTION);
                 }
         }
     }
 
-    public String returnComplexString(String query) {
+    private String returnComplexString(String query) {
         for (String s : COMPLEX_QUERIES) {
             if (query.contains(s)) {
                 return s;
