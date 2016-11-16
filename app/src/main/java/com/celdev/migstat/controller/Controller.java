@@ -8,7 +8,6 @@ import com.celdev.migstat.MainActivity;
 import com.celdev.migstat.controller.parser.SimpleCaseStatusParser;
 import com.celdev.migstat.model.Application;
 import com.celdev.migstat.model.ApplicationNumberType;
-import com.celdev.migstat.model.ApplicationStatus;
 import com.celdev.migstat.model.WaitingTime;
 import com.celdev.migstat.view.ViewInterface;
 
@@ -120,10 +119,10 @@ public class Controller implements DataStorageInterface {
             }
             if (result instanceof SimpleCaseStatusParser.StatusAndDate) {
                 SimpleCaseStatusParser.StatusAndDate s = (SimpleCaseStatusParser.StatusAndDate) result;
-                boolean finishedNow = application.newStatusTypeReturnTrueIfFromWaitingToFinish(s.getStatusType());
+                boolean finishedNow = application.newStatusTypeReturnTrueIfGetDecision(s.getStatusType());
                 DataStorage.getInstance().saveApplication(activity, application);
                 if (finishedNow) {
-                    updateView(ViewInterface.ModelChange.JUST_FINISHED);
+                    updateView(ViewInterface.ModelChange.FINISHED);
                 } else {
                     updateView(ViewInterface.ModelChange.APPLICATION);
                 }
@@ -256,6 +255,17 @@ public class Controller implements DataStorageInterface {
         waitingTime = null;
     }
 
+    public boolean resetBecauseNewVersion() {
+        return DataStorage.getInstance().checkVersionResetIfNeeded(activity);
+    }
 
+
+    public void saveEnableThemes() {
+        DataStorage.getInstance().saveEnabledThemes(activity);
+    }
+
+    public boolean themesIsEnabled() {
+        return DataStorage.getInstance().isThemeEnabled(activity);
+    }
 
 }

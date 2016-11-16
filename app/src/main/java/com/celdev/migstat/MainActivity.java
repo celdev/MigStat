@@ -74,9 +74,15 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //resetAllData();
-        //DataStorage.getInstance().deleteWaitingTime(this);
 
+        if (controller.resetBecauseNewVersion()) {
+            new AlertDialog.Builder(this).setMessage(R.string.reset_because_new_version).setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            }).create().show();
+        }
 
 
         initLayout();
@@ -392,10 +398,6 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
         controller.checkApplicationNumberReturnApplication(Integer.parseInt(applicationNumberField.getText().toString()), getApplicationNumberType());
     }
 
-
-    private void resetAllData() {
-        controller.deleteAll();
-    }
 
 
 

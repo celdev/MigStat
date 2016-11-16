@@ -20,31 +20,22 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.celdev.migstat.controller.ApplicationStatusChecker;
 import com.celdev.migstat.controller.Controller;
-import com.celdev.migstat.controller.DataStorage;
 import com.celdev.migstat.controller.DataStorageLoadException;
-import com.celdev.migstat.controller.NoApplicationException;
-import com.celdev.migstat.controller.NoWaitingTimeException;
-import com.celdev.migstat.controller.WaitingTimeDataStoragePacket;
-import com.celdev.migstat.controller.WebViewResponseParser;
-import com.celdev.migstat.controller.parser.AsyncTaskResultReceiver;
-import com.celdev.migstat.controller.parser.SimpleCaseStatusParser;
 import com.celdev.migstat.controller.utils.DateUtils;
 import com.celdev.migstat.model.Application;
 import com.celdev.migstat.model.NoApplicationNumberException;
 import com.celdev.migstat.model.WaitingTime;
 import com.celdev.migstat.view.BackgroundChanger;
 import com.celdev.migstat.view.CustomAboutDialog;
+import com.celdev.migstat.view.CustomGotDecisionDialog;
+import com.celdev.migstat.view.CustomInterstitialAd;
 import com.celdev.migstat.view.CustomNewWaitingTimeDialog;
 import com.celdev.migstat.view.ViewInterface;
-import com.celdev.migstat.view.ViewUpdateReceiver;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.util.Date;
 import java.util.Locale;
 
 public class ShowStatus extends AppCompatActivity implements ViewInterface {
@@ -60,6 +51,8 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
     private ProgressBarUpdaterThread progressBarUpdaterThread;
 
     private RelativeLayout root;
+
+    private CustomInterstitialAd customInterstitialAd;
 
     private boolean fromOnCreate = false;
 
@@ -85,6 +78,22 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
             returnToMainActivityBecauseError(R.string.alpha_incorrect_state,true);
         }
         initButtonFunctionality();
+        invalidateOptionsMenu();
+    }
+
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        Log.d(MainActivity.LOG_KEY, "onPrepareOptionsMenu called");
+        if (controller.themesIsEnabled()) {
+            Log.d(MainActivity.LOG_KEY, "Themes are unlocked");
+            menu.findItem(R.id.menu_change_bg).setEnabled(true);
+            menu.findItem(R.id.menu_unlock_theme).setTitle(R.string.support_watch_ad);
+        }
+        if (customInterstitialAd == null) {
+            customInterstitialAd = new CustomInterstitialAd(controller, this);
+        }
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
@@ -109,14 +118,20 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
                 processUpdateWaitingTime();
                 handleCheckOldNewWaitingTime();
                 break;
-            case JUST_FINISHED:
-                //returned when application goes from waiting to decision
+            case FINISHED:
+                processUpdateApplication();
+                processGotDecision();
                 break;
             default:
                 processUpdateApplication();
                 processUpdateWaitingTime();
                 Log.d(MainActivity.LOG_KEY, "got other model change enum" + modelChange.name());
         }
+    }
+
+    private void processGotDecision() {
+        new CustomGotDecisionDialog(this).create().show();
+
     }
 
     private void processUpdateApplication() {
@@ -148,10 +163,10 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
                     getString(R.string.estimated_months_placeholder_single_month,(int)waitingTime.getAverage()) :
                     getString(R.string.estimated_months_placeholder, waitingTime.getLowMonth(), waitingTime.getHighMonth()));
             refreshProgressThread();
-            daysToDecisionText.setText("" + DateUtils.daysUntilDecision(
+            daysToDecisionText.setText(getString(R.string.integer_placeholder, DateUtils.daysUntilDecision(
                     DateUtils.addAverageMonthsToDate(
                             application.getApplicationDate(),
-                            waitingTime.getAverage())));
+                            waitingTime.getAverage()))));
         } catch (DataStorageLoadException e) {
             e.printStackTrace();
         }
@@ -383,6 +398,7 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
                 showAboutDialog();
                 return true;
             case R.id.menu_unlock_theme:
+                customInterstitialAd.show();
                 return true;
             case R.id.menu_change_bg:
                 setChangeBackgroundMode();
@@ -396,7 +412,7 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
     }
 
     private void setChangeBackgroundMode() {
-        new BackgroundChanger(root, changeBgView, this);
+        new BackgroundChanger(controller,root, changeBgView, this);
     }
 
     private void showAboutDialog() {
@@ -408,7 +424,7 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
     }
 
     private void changeBackground() {
-        int backgroundIndex = DataStorage.getInstance().getBackgroundIndex(this);
+        int backgroundIndex = controller.loadBackground();
         int[] backgrounds = BackgroundChanger.drawables;
         if (backgroundIndex > 0 && backgroundIndex < backgrounds.length) {
             root.setBackground(getDrawable(backgrounds[backgroundIndex]));

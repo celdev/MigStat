@@ -27,17 +27,23 @@ public class DataStorage {
     private final static String WAITING_TIME_UPDATED_AT = "WAITING_TIME_UPDATED_AT";
 
 
+    private final static String APP_ENABLE_THEMES = "APP_ENABLE_THEMES";
+    private final static String APP_ENABLE_THEMES_TIME = "APP_ENABLE_THEMES_TIME";
+
+    private final static String APP_SHOWN_GOT_DECISION = "APP_SHOWN_GOT_DECISION";
 
     private final static String APP_BACKGROUND_INDEX = "APP_BACKGROUND_INDEX";
 
-    private final static String VERSION_KEY = "VERSION_KEY";
+    private final static String VERSION_KEY = "APP_VERSION_KEY";
 
-    private static final long APP_VERSION = 2L;
+    private static final long APP_VERSION = 4L;
+
+    private static final long THEME_ENABLE_TIME = 259200000L; //3 days
 
 
     private static DataStorage dataStorage;
 
-    public static DataStorage getInstance(){
+    static DataStorage getInstance(){
         if (dataStorage == null) {
             dataStorage = new DataStorage();
         }
@@ -47,12 +53,12 @@ public class DataStorage {
     private DataStorage() {
     }
 
-    public int getBackgroundIndex(Context context) {
+    int getBackgroundIndex(Context context) {
         SharedPreferences preferences = getSharedPreference(context);
         return preferences.getInt(APP_BACKGROUND_INDEX, 0);
     }
 
-    public void saveBackgroundIndex(Context context, int index) {
+    void saveBackgroundIndex(Context context, int index) {
         SharedPreferences preferences = getSharedPreference(context);
         preferences.edit().putInt(APP_BACKGROUND_INDEX, index).apply();
     }
@@ -182,29 +188,34 @@ public class DataStorage {
         boolean returnValue = true;
         try {
             SharedPreferences preferences = getSharedPreference(context);
-            if (preferences.contains(VERSION_KEY)) {
-                long version = preferences.getLong(VERSION_KEY, -1);
-                returnValue = version < APP_VERSION;
-            }
-            saveVersion(context);
+            long version = preferences.getLong(VERSION_KEY, -1);
+            Log.d(MainActivity.LOG_KEY, "Contains version key value = " + version);
+            returnValue = version < APP_VERSION && version != -1;
         } catch (Exception e) {
             e.printStackTrace();
         }
+        Log.d(MainActivity.LOG_KEY, "first time new version " + returnValue);
         return returnValue;
     }
 
-    public void checkVersionResetIfNeeded(Context context) {
-        if (firstTimeNewVersion(context)) {
+    boolean checkVersionResetIfNeeded(Context context) {
+        boolean reset = firstTimeNewVersion(context);
+        if (reset) {
             deleteAllData(context);
         }
+        saveVersion(context);
+        return reset;
     }
 
     private void saveVersion(Context context) {
+        Log.d(MainActivity.LOG_KEY, "Saving app version " + APP_VERSION);
         getSharedPreference(context).edit().putLong(VERSION_KEY, APP_VERSION).apply();
     }
 
     void deleteAllData(Context context) {
+        Log.d(MainActivity.LOG_KEY, "Deleting all data");
         getSharedPreference(context).edit().clear().apply();
+        saveVersion(context);
     }
 
     void deleteWaitingTime(Context context) {
@@ -217,5 +228,33 @@ public class DataStorage {
                 remove(WAITING_TIME_HIGH_MONTH).
                 remove(WAITING_TIME_TYPE_QUERY).apply();
     }
+
+    void saveEnabledThemes(Context context) {
+        SharedPreferences preferences = getSharedPreference(context);
+        preferences.edit().
+                putBoolean(APP_ENABLE_THEMES, true).
+                putLong(APP_ENABLE_THEMES_TIME, System.currentTimeMillis()).
+                apply();
+        Log.d(MainActivity.LOG_KEY, "Finished saving Enabled ad");
+    }
+
+    boolean isThemeEnabled(Context context) {
+        SharedPreferences preferences = getSharedPreference(context);
+        boolean themesIsEnabled = preferences.getBoolean(APP_ENABLE_THEMES, false);
+        if (!themesIsEnabled) {
+            Log.d(MainActivity.LOG_KEY, "themes are not enabled");
+            return false;
+        }
+        long enableTime = preferences.getLong(APP_ENABLE_THEMES_TIME, 0);
+        Log.d(MainActivity.LOG_KEY, "ms at enabled time = " + enableTime);
+        if ((enableTime + THEME_ENABLE_TIME) > System.currentTimeMillis()) {
+            Log.d(MainActivity.LOG_KEY, "themes was enabled less than 3 days ago");
+            return true;
+        }
+        preferences.edit().remove(APP_ENABLE_THEMES).apply();
+        Log.d(MainActivity.LOG_KEY, "themes was enabled more than 3 days ago");
+        return false;
+    }
+
 
 }

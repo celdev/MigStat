@@ -10,13 +10,15 @@ import android.widget.RelativeLayout;
 
 import com.celdev.migstat.R;
 import com.celdev.migstat.ShowStatus;
+import com.celdev.migstat.controller.Controller;
 import com.celdev.migstat.controller.DataStorage;
 
 public class BackgroundChanger {
 
-    public final ShowStatus activity;
-    public final RelativeLayout root;
-    public final LinearLayout parent;
+    private final ShowStatus activity;
+    private final RelativeLayout root;
+    private final LinearLayout parent;
+    private final Controller controller;
 
     public static final int[] drawables = new int[]{
             R.drawable.bg_path_wood,
@@ -30,10 +32,11 @@ public class BackgroundChanger {
             R.drawable.relationship_lake
     };
 
-    public static int currentBG = 0;
+    private static int currentBG = 0;
 
-    public BackgroundChanger(RelativeLayout root, LinearLayout parent, ShowStatus activity) {
+    public BackgroundChanger(Controller controller,RelativeLayout root, LinearLayout parent, ShowStatus activity) {
         this.root = root;
+        this.controller = controller;
         this.activity = activity;
         this.parent = parent;
         initView();
@@ -48,7 +51,7 @@ public class BackgroundChanger {
             ImageButton nextBtn = (ImageButton) linearLayout.findViewById(R.id.change_bg_next);
             Button okBtn = (Button) linearLayout.findViewById(R.id.change_bg_ok);
             initButtons(backBtn, nextBtn, okBtn);
-            //parent.addView(linearLayout);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -97,7 +100,7 @@ public class BackgroundChanger {
     }
 
     private void saveNewBackground() {
-        DataStorage.getInstance().saveBackgroundIndex(activity, currentBG);
+        controller.saveBackground(currentBG);
     }
 
 }

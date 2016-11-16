@@ -6,9 +6,9 @@
         android:icon="@drawable/ic_help_outline_black_24dp"
         app:showAsAction="always"/>
     <item android:title="@string/menu_unlock_change_bg"
-        android:id="@+id/menu_unlock_theme" />
+        android:id="@+id/menu_unlock_theme" android:enabled="true"/>
     <item android:title="@string/change_bg"
-        android:id="@+id/menu_change_bg" />
+        android:id="@+id/menu_change_bg" android:enabled="false" />
     <item android:title="@string/reset_application"
         android:id="@+id/menu_reset_application" />
 </menu>

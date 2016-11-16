@@ -12,7 +12,7 @@ public interface ViewInterface {
         NEW_WAITING_TIME(),
         SAVE_SUCCESS,
         SAVE_FAILED,
-        JUST_FINISHED,
+        FINISHED,
         INVALID_APPLICATION,
         WAITING_TIME_OK,
         MULTIPLE_WAITING_TIME

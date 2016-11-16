@@ -79,5 +79,22 @@
     <string name="cancel">Cancel</string>
     <string name="choose_months">Choose custom waiting time in months</string>
     <string name="not_implemented_yet">This type of waiting time isn\'t implemented yet</string>
+    <string name="reset_because_new_version"><b>New Version</b>
+    \nThis application have been updated and all data had to be reset.
+        \nI apologize for the inconvenience.
+    </string>
+    <string name="integer_placeholder">%1$d</string>
+    <string name="congratulations_on_decision">
+        <b>Congratulations</b>
+        \nA decision seems to have been made in your case.
+
+        \n\nThis feature is untested because it would require me to know
+        when an application would get a decision. Please let me know if you got this
+        message and you didn\'t get a decision.
+    </string>
+
+
+    <string name="ad_unit_id">ca-app-pub-3940256099942544/6300978111</string>
+    <string name="support_watch_ad">View ad to support dev</string>
 
 </resources>

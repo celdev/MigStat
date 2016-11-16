@@ -76,16 +76,11 @@ public class Application{
         return applicationNumber;
     }
 
-    public boolean newStatusTypeReturnTrueIfFromWaitingToFinish(StatusType statusType) {
+    public boolean newStatusTypeReturnTrueIfGetDecision(StatusType statusType) {
         if (hasApplicationNumber) {
             try {
-                if (getApplicationStatus().getStatusType().getNumber() == 1
-                        && statusType.getNumber() == 2) {
-                    //new status is finished. extremely important to update user
-                    getApplicationStatus().setStatus(statusType.getNumber());
-                    return true;
-                }
                 getApplicationStatus().setStatus(statusType.getNumber());
+                return statusType.equals(StatusType.FINISHED);
             } catch (NoApplicationNumberException e) {
                 e.printStackTrace();
                 // will never happen
