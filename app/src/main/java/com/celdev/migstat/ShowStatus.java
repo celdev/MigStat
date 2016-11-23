@@ -21,6 +21,7 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.celdev.migstat.background.ServiceRunner;
 import com.celdev.migstat.controller.Controller;
 import com.celdev.migstat.controller.DataStorageLoadException;
 import com.celdev.migstat.controller.utils.DateUtils;
@@ -79,6 +80,7 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
         }
         initButtonFunctionality();
         invalidateOptionsMenu();
+        startService(new Intent(this, ServiceRunner.class));
     }
 
 
@@ -215,7 +217,7 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
     private void setApplicationViewInformation() {
         Log.d(MainActivity.LOG_KEY, "updating progress from application");
         applicationDateTextView.setText(DateUtils.msToDateString(application.getApplicationDate()));
-        daysSinceApplicationText.setText("" + DateUtils.daysWaited(application.getApplicationDate()));
+        daysSinceApplicationText.setText(getString(R.string.integer_placeholder, DateUtils.daysWaited(application.getApplicationDate())));
     }
 
     private void disableRefreshAnimation() {
@@ -338,7 +340,7 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        progressBarText.setText(decimalFormat.format(percent * 100) + "%");
+                        progressBarText.setText(getString(R.string.percent_placeholder, decimalFormat.format(percent * 100)));
                         progressBar.setProgress((int)(percent*10000));
                     }
                 });

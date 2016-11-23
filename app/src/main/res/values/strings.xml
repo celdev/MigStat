@@ -84,6 +84,7 @@
         \nI apologize for the inconvenience.
     </string>
     <string name="integer_placeholder">%1$d</string>
+    <string name="percent_placeholder">%1$s%</string>
     <string name="congratulations_on_decision">
         <b>Congratulations</b>
         \nA decision seems to have been made in your case.
@@ -96,5 +97,7 @@
 
     <string name="ad_unit_id">ca-app-pub-3940256099942544/6300978111</string>
     <string name="support_watch_ad">View ad to support dev</string>
+    <string name="notification_text_made_decision">A decision has been made in your case</string>
+    <string name="notification_title_made_decision">A decision...</string>
 
 </resources>

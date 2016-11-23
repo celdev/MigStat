@@ -1,6 +1,7 @@
 package com.celdev.migstat.controller;
 
 import android.app.Activity;
+import android.content.Context;
 import android.support.annotation.DrawableRes;
 import android.util.Log;
 
@@ -15,7 +16,7 @@ public class Controller implements DataStorageInterface {
 
 
     private static Controller instance;
-    private Activity activity;
+    private Context context;
     private ViewInterface viewInterface;
 
     private static Application application;
@@ -30,10 +31,10 @@ public class Controller implements DataStorageInterface {
     public ApplicationState getApplicationState() {
         try {
             if (application == null) {
-                application = DataStorage.getInstance().loadApplication(activity);
+                application = DataStorage.getInstance().loadApplication(context);
             }
             if (waitingTime == null) {
-                waitingTime = DataStorage.getInstance().loadWaitingTime(activity);
+                waitingTime = DataStorage.getInstance().loadWaitingTime(context);
             }
         } catch (NoApplicationException e) {
             return ApplicationState.NO_APPLICATION;
@@ -44,12 +45,12 @@ public class Controller implements DataStorageInterface {
     }
 
 
-    private Controller(Activity activity, ViewInterface viewInterface) {
-        this.activity = activity;
+    private Controller(Context context, ViewInterface viewInterface) {
+        this.context = context;
         this.viewInterface = viewInterface;
     }
 
-    public static Controller getInstance(Activity activity, ViewInterface viewInterface) {
+    public static Controller getInstance(Context activity, ViewInterface viewInterface) {
         if (instance != null) {
             instance = new Controller(activity, viewInterface);
         } else {
@@ -96,7 +97,7 @@ public class Controller implements DataStorageInterface {
     @Override
     public Application getApplication() throws DataStorageLoadException {
         if (application == null) {
-            application = DataStorage.getInstance().loadApplication(activity);
+            application = DataStorage.getInstance().loadApplication(context);
         }
         return application;
     }
@@ -120,7 +121,7 @@ public class Controller implements DataStorageInterface {
             if (result instanceof SimpleCaseStatusParser.StatusAndDate) {
                 SimpleCaseStatusParser.StatusAndDate s = (SimpleCaseStatusParser.StatusAndDate) result;
                 boolean finishedNow = application.newStatusTypeReturnTrueIfGetDecision(s.getStatusType());
-                DataStorage.getInstance().saveApplication(activity, application);
+                DataStorage.getInstance().saveApplication(context, application);
                 if (finishedNow) {
                     updateView(ViewInterface.ModelChange.FINISHED);
                 } else {
@@ -205,21 +206,21 @@ public class Controller implements DataStorageInterface {
     @Override
     public boolean saveAll() {
         DataStorage dataStorage = DataStorage.getInstance();
-        return !(application == null || waitingTime == null) && dataStorage.saveApplication(activity, application) && dataStorage.saveWaitingTime(activity, waitingTime);
+        return !(application == null || waitingTime == null) && dataStorage.saveApplication(context, application) && dataStorage.saveWaitingTime(context, waitingTime);
     }
 
     public boolean saveApplication(Application application) {
-        return DataStorage.getInstance().saveApplication(activity, application);
+        return DataStorage.getInstance().saveApplication(context, application);
     }
 
     public boolean saveWaitingTime(WaitingTime waitingTime) {
-        return DataStorage.getInstance().saveWaitingTime(activity, waitingTime);
+        return DataStorage.getInstance().saveWaitingTime(context, waitingTime);
     }
 
     @Override
     public WaitingTime getWaitingTime() throws DataStorageLoadException {
         if (waitingTime == null) {
-            waitingTime = DataStorage.getInstance().loadWaitingTime(activity);
+            waitingTime = DataStorage.getInstance().loadWaitingTime(context);
             application.setWaitingTimeReturnBothIfNewer(waitingTime);
         }
         return waitingTime;
@@ -228,44 +229,44 @@ public class Controller implements DataStorageInterface {
     @Override
     public void loadAll() throws DataStorageLoadException {
         DataStorage dataStorage = DataStorage.getInstance();
-        application = dataStorage.loadApplication(activity);
-        waitingTime = dataStorage.loadWaitingTime(activity);
+        application = dataStorage.loadApplication(context);
+        waitingTime = dataStorage.loadWaitingTime(context);
     }
 
     @Override
     public void saveBackground(@DrawableRes int background) {
-        DataStorage.getInstance().saveBackgroundIndex(activity, background);
+        DataStorage.getInstance().saveBackgroundIndex(context, background);
     }
 
     @Override
     public int loadBackground() {
-        return DataStorage.getInstance().getBackgroundIndex(activity);
+        return DataStorage.getInstance().getBackgroundIndex(context);
     }
 
     @Override
     public void deleteWaitingTime() {
-        DataStorage.getInstance().deleteWaitingTime(activity);
+        DataStorage.getInstance().deleteWaitingTime(context);
         waitingTime = null;
     }
 
     @Override
     public void deleteAll() {
-        DataStorage.getInstance().deleteAllData(activity);
+        DataStorage.getInstance().deleteAllData(context);
         application = null;
         waitingTime = null;
     }
 
     public boolean resetBecauseNewVersion() {
-        return DataStorage.getInstance().checkVersionResetIfNeeded(activity);
+        return DataStorage.getInstance().checkVersionResetIfNeeded(context);
     }
 
 
     public void saveEnableThemes() {
-        DataStorage.getInstance().saveEnabledThemes(activity);
+        DataStorage.getInstance().saveEnabledThemes(context);
     }
 
     public boolean themesIsEnabled() {
-        return DataStorage.getInstance().isThemeEnabled(activity);
+        return DataStorage.getInstance().isThemeEnabled(context);
     }
 
 }

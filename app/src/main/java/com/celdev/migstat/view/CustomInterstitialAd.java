@@ -31,14 +31,19 @@ public class CustomInterstitialAd {
             public void onAdClosed() {
                 Log.d(MainActivity.LOG_KEY, "ad onClose called saving enable themes");
                 controller.saveEnableThemes();
+				doAdRequest();
                 super.onAdClosed();
             }
         });
-        AdRequest adRequest = new AdRequest.Builder().
+		doAdRequest();
+    }
+	
+	private void doAdRequest(){
+		AdRequest adRequest = new AdRequest.Builder().
                 addTestDevice(AdRequest.DEVICE_ID_EMULATOR).
                 build();
         interstitialAd.loadAd(adRequest);
-    }
+	}
 
 
 
