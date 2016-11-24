@@ -1,7 +1,9 @@
 package com.celdev.migstat.controller.parser;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
+import com.celdev.migstat.MainActivity;
 import com.celdev.migstat.controller.utils.DateUtils;
 import com.celdev.migstat.model.Application;
 import com.celdev.migstat.model.ApplicationDate;
@@ -83,6 +85,7 @@ public class SimpleCaseStatusParser {
 
         @Override
         protected void onPostExecute(StatusAndDate statusAndDate) {
+            Log.d(MainActivity.LOG_KEY, "Parsed status and date: " + statusAndDate);
             asyncTaskResultReceiver.receiveResult(statusAndDate);
         }
     }

@@ -1,5 +1,8 @@
 package com.celdev.migstat.controller;
 
+import android.util.Log;
+
+import com.celdev.migstat.MainActivity;
 import com.celdev.migstat.controller.parser.AsyncTaskResultReceiver;
 import com.celdev.migstat.controller.parser.SimpleCaseStatusParser;
 import com.celdev.migstat.model.Application;
@@ -32,8 +35,10 @@ public class ApplicationStatusChecker implements AsyncTaskResultReceiver{
     @Override
     public void receiveResult(Object result) {
         if (result instanceof SimpleCaseStatusParser.StatusAndDate) {
+            Log.d(MainActivity.LOG_KEY, "check appplication result object class = StatusAndDate");
             asyncCallback.receiveAsyncResult(result);
         } else {
+            Log.d(MainActivity.LOG_KEY, "check application parser exception");
             asyncCallback.receiveAsyncResult(AsyncCallbackErrorObject.PARSER_EXCEPTION);
         }
     }

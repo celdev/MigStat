@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
     private Switch useNumberSwitch;
     private Application application;
 
-    private Controller controller = Controller.getInstance(this, this);
+    private Controller controller = new Controller(this, this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -180,7 +180,7 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
     @Override
     protected void onResume() {
         super.onResume();
-        controller = Controller.getInstance(this, this);
+        controller = new Controller(this, this);
     }
 
 

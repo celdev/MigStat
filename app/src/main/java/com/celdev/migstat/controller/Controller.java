@@ -15,12 +15,15 @@ import com.celdev.migstat.view.ViewInterface;
 public class Controller implements DataStorageInterface {
 
 
-    private static Controller instance;
     private Context context;
     private ViewInterface viewInterface;
 
     private static Application application;
     private static WaitingTime waitingTime;
+
+    public boolean waitingTimeIsLoaded() {
+        return application.getWaitingTime() != null;
+    }
 
     public enum ApplicationState {
         NO_APPLICATION,
@@ -35,6 +38,7 @@ public class Controller implements DataStorageInterface {
             }
             if (waitingTime == null) {
                 waitingTime = DataStorage.getInstance().loadWaitingTime(context);
+                application.setWaitingTime(waitingTime);
             }
         } catch (NoApplicationException e) {
             return ApplicationState.NO_APPLICATION;
@@ -45,26 +49,14 @@ public class Controller implements DataStorageInterface {
     }
 
 
-    private Controller(Context context, ViewInterface viewInterface) {
+    public Controller(Context context, ViewInterface viewInterface) {
         this.context = context;
         this.viewInterface = viewInterface;
     }
 
-    public static Controller getInstance(Context activity, ViewInterface viewInterface) {
-        if (instance != null) {
-            instance = new Controller(activity, viewInterface);
-        } else {
-            instance = new Controller(activity, viewInterface);
-        }
-        return instance;
-    }
 
     public void setApplication(Application application) {
         Controller.application = application;
-    }
-
-    public void setWaitingTime(WaitingTime waitingTime) {
-        Controller.application.setWaitingTimeReturnBothIfNewer(waitingTime);
     }
 
     public void updateApplication() {
@@ -73,6 +65,18 @@ public class Controller implements DataStorageInterface {
         } else {
             applicationAsyncCallback.receiveAsyncResult(AsyncCallbackErrorObject.NO_APPLICATION_NUMBER);
         }
+    }
+
+    public boolean isUsingCustomWaitingTime() {
+        return application.getWaitingTime().isUseCustomMonths();
+    }
+
+    public boolean hasWaitingTimeQuery() {
+        return application.getWaitingTime().hasQuery();
+    }
+
+    public boolean hasCustomWaitingTime() {
+        return application.getWaitingTime().hasCustomWaitingTime();
     }
 
     public void updateWaitingTime() {
@@ -167,15 +171,18 @@ public class Controller implements DataStorageInterface {
         @Override
         public void receiveAsyncResult(Object result) {
             if (result instanceof AsyncCallbackErrorObject) {
+                Log.d(MainActivity.LOG_KEY, "check if application is valid object class = AsyncCallbackErrorObject");
                 updateView(ViewInterface.ModelChange.INVALID_APPLICATION);
             }
             if (result instanceof SimpleCaseStatusParser.StatusAndDate) {
+                Log.d(MainActivity.LOG_KEY, "check if application is valid object class = StatusAndDate");
                 SimpleCaseStatusParser.StatusAndDate s = (SimpleCaseStatusParser.StatusAndDate) result;
                 application = new Application(s.getStatusType(),
                         s.getApplicationDate().getApplicationDate(),
                         s.getApplicationNumber().getApplicationNumber(), s.getApplicationNumber().getApplicationNumberType());
                 updateView(ViewInterface.ModelChange.APPLICATION_OK);
                 saveApplication(application);
+                return;
             }
             updateView(ViewInterface.ModelChange.INVALID_APPLICATION);
         }
@@ -211,6 +218,16 @@ public class Controller implements DataStorageInterface {
 
     public boolean saveApplication(Application application) {
         return DataStorage.getInstance().saveApplication(context, application);
+    }
+
+    public void setWaitingTimeMode(boolean useCustom) {
+        application.getWaitingTime().setWaitingTimeMode(useCustom ? WaitingTime.WaitingTimeMode.CUSTOM : WaitingTime.WaitingTimeMode.MIGRATIONSVERKET);
+        saveWaitingTime(waitingTime);
+    }
+
+    public void setAndUseCustomWaitingTime(int months) {
+        application.getWaitingTime().setUseCustomMonthsMode(months);
+        saveWaitingTime(waitingTime);
     }
 
     public boolean saveWaitingTime(WaitingTime waitingTime) {

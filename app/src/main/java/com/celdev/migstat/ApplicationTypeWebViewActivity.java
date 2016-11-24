@@ -30,7 +30,7 @@ public class ApplicationTypeWebViewActivity extends AppCompatActivity implements
     private ProgressDialog progressDialog;
     private String url;
 
-    private Controller controller = Controller.getInstance(this, this);
+    private Controller controller = new Controller(this, this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -174,7 +174,7 @@ public class ApplicationTypeWebViewActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-        controller = Controller.getInstance(this, this);
+        controller = new Controller(this, this);
     }
 
 

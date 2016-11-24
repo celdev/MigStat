@@ -7,7 +7,10 @@ import java.util.Comparator;
 public class WaitingTime implements WaitingTimeInterface {
 
 
-
+    public enum WaitingTimeMode{
+        CUSTOM,
+        MIGRATIONSVERKET
+    }
 
     private int lowMonth = -1, highMonth = -1;
     private String updatedAtDate;
@@ -39,6 +42,10 @@ public class WaitingTime implements WaitingTimeInterface {
         return query != null && !query.isEmpty();
     }
 
+    public boolean hasCustomWaitingTime() {
+        return customMonths != 0;
+    }
+
     //returns true if lowMonth == highMonth, or if useCustomMonths is set
     //is set
     public boolean lowMonthAndHighMonthIsEqual() {
@@ -50,6 +57,10 @@ public class WaitingTime implements WaitingTimeInterface {
         this.customMonths = customMonths;
         this.useCustomMonths = true;
         return this;
+    }
+
+    public void setWaitingTimeMode(WaitingTimeMode waitingTimeMode) {
+        useCustomMonths = !waitingTimeMode.equals(WaitingTimeMode.MIGRATIONSVERKET);
     }
 
     public boolean isUseCustomMonths() {

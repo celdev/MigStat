@@ -3,8 +3,17 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:title="@string/about"
         android:id="@+id/menu_about"
-        android:icon="@drawable/ic_help_outline_black_24dp"
+        android:icon="@drawable/ic_help"
         app:showAsAction="always"/>
+
+    <item android:title="@string/menu_string_use_custom_waiting_time"
+        android:id="@+id/menu_use_custom_waiting_time" />
+    <item android:title="@string/menu_string_set_custom_waiting_time"
+        android:id="@+id/menu_set_custom_waiting_time" />
+    <item android:title="@string/menu_string_change_case_type"
+        android:id="@+id/menu_set_case_type" />
+    <item android:title="@string/menu_string_use_case_type"
+        android:id="@+id/menu_use_migrationverket_waiting_time" />
     <item android:title="@string/menu_unlock_change_bg"
         android:id="@+id/menu_unlock_theme" android:enabled="true"/>
     <item android:title="@string/change_bg"

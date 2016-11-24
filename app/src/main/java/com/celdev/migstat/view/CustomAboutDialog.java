@@ -1,7 +1,6 @@
 package com.celdev.migstat.view;
 
 import android.app.AlertDialog;
-import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.text.util.Linkify;
@@ -10,8 +9,6 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.celdev.migstat.R;
-
-import java.util.Calendar;
 
 public class CustomAboutDialog extends AlertDialog.Builder {
 
@@ -23,7 +20,7 @@ public class CustomAboutDialog extends AlertDialog.Builder {
                 dialog.dismiss();
             }
         });
-        setIcon(R.drawable.ic_help_outline_black_24dp);
+        setIcon(R.drawable.ic_help);
         setTitle(R.string.about);
 
         ScrollView scrollView = new ScrollView(context);

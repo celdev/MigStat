@@ -33,6 +33,8 @@ import com.celdev.migstat.view.CustomAboutDialog;
 import com.celdev.migstat.view.CustomGotDecisionDialog;
 import com.celdev.migstat.view.CustomInterstitialAd;
 import com.celdev.migstat.view.CustomNewWaitingTimeDialog;
+import com.celdev.migstat.view.CustomSetWaitingTimeDialog;
+import com.celdev.migstat.view.NumberPickerDialogReturn;
 import com.celdev.migstat.view.ViewInterface;
 
 import java.text.DecimalFormat;
@@ -57,12 +59,8 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
 
     private boolean fromOnCreate = false;
 
-    private long timeWhenLastUpdatedStatus = 0;
-    private long timeWhenLastUpdatedWaitingTime = 0;
 
-    private Controller controller = Controller.getInstance(this, this);
-
-    private static final long UPDATE_MS_TRESHHOLD = 1800000; //30 minutes
+    private Controller controller = new Controller(this, this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +77,6 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
             returnToMainActivityBecauseError(R.string.alpha_incorrect_state,true);
         }
         initButtonFunctionality();
-        invalidateOptionsMenu();
         startService(new Intent(this, ServiceRunner.class));
     }
 
@@ -91,6 +88,19 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
             Log.d(MainActivity.LOG_KEY, "Themes are unlocked");
             menu.findItem(R.id.menu_change_bg).setEnabled(true);
             menu.findItem(R.id.menu_unlock_theme).setTitle(R.string.support_watch_ad);
+        }
+        if (controller.waitingTimeIsLoaded()) {
+            if (controller.isUsingCustomWaitingTime()) {
+                menu.findItem(R.id.menu_use_custom_waiting_time).setVisible(false);
+            } else {
+                menu.findItem(R.id.menu_use_migrationverket_waiting_time).setVisible(false);
+            }
+            if (!controller.hasWaitingTimeQuery()) {
+                menu.findItem(R.id.menu_use_migrationverket_waiting_time).setVisible(false);
+            }
+            if (!controller.hasCustomWaitingTime()) {
+                menu.findItem(R.id.menu_use_custom_waiting_time).setVisible(false);
+            }
         }
         if (customInterstitialAd == null) {
             customInterstitialAd = new CustomInterstitialAd(controller, this);
@@ -169,6 +179,7 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
                     DateUtils.addAverageMonthsToDate(
                             application.getApplicationDate(),
                             waitingTime.getAverage()))));
+            invalidateOptionsMenu();
         } catch (DataStorageLoadException e) {
             e.printStackTrace();
         }
@@ -284,7 +295,7 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
             fromOnCreate = false;
             return;
         }
-        controller = Controller.getInstance(this, this);
+        controller = new Controller(this, this);
         if (application != null && application.getWaitingTime() != null) {
             refreshProgressThread();
         } else {
@@ -399,6 +410,30 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
             case R.id.menu_about:
                 showAboutDialog();
                 return true;
+            case R.id.menu_set_case_type:
+                Intent intent = new Intent(this, ApplicationTypeWebViewActivity.class);
+                startActivity(intent);
+                return true;
+            case R.id.menu_set_custom_waiting_time:
+                new CustomSetWaitingTimeDialog(this, new NumberPickerDialogReturn() {
+                    @Override
+                    public void returnOnOk(int months) {
+                        controller.setAndUseCustomWaitingTime(months);
+                    }
+                }).createAndShow();
+                processUpdateWaitingTime();
+                refreshButton.performClick();
+                return true;
+            case R.id.menu_use_custom_waiting_time:
+                controller.setWaitingTimeMode(true);
+                processUpdateWaitingTime();
+                refreshButton.performClick();
+                return true;
+            case R.id.menu_use_migrationverket_waiting_time:
+                controller.setWaitingTimeMode(false);
+                processUpdateWaitingTime();
+                refreshButton.performClick();
+                return true;
             case R.id.menu_unlock_theme:
                 customInterstitialAd.show();
                 return true;
@@ -411,6 +446,7 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
             default:
                 return super.onOptionsItemSelected(item);
         }
+
     }
 
     private void setChangeBackgroundMode() {

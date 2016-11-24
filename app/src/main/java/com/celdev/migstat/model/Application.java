@@ -58,6 +58,10 @@ public class Application{
         return null;
     }
 
+    public void setWaitingTime(WaitingTime waitingTime) {
+        this.waitingTime = waitingTime;
+    }
+
     public long getApplicationDate() {
         return applicationDate.getApplicationDate();
     }
