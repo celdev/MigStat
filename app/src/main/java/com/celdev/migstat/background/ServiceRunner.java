@@ -1,10 +1,8 @@
 package com.celdev.migstat.background;
 
 import android.app.Service;
-import android.content.Context;
+
 import android.content.Intent;
-import android.icu.text.LocaleDisplayNames;
-import android.nfc.Tag;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -13,14 +11,18 @@ import com.celdev.migstat.MainActivity;
 import com.celdev.migstat.controller.Controller;
 import com.celdev.migstat.view.ViewInterface;
 
+import java.util.Calendar;
+import java.util.TimeZone;
+
 
 public class ServiceRunner extends Service implements ViewInterface{
 
 
-    private Controller controller;
     private ServiceThread serviceThread;
 
-    private static final String TAG = MainActivity.LOG_KEY + ".Service";
+    public static final long MS_BETWEEN_UPDATES = 30 * 60 * 1000;
+
+    public static final String TAG = MainActivity.LOG_KEY + ".Service";
 
 
     @Override
@@ -30,6 +32,12 @@ public class ServiceRunner extends Service implements ViewInterface{
                 case FINISHED:
                     NotificationHelper.doFinishedApplicationStatusNotification(this);
                     Log.d(TAG, "Service received modelChange: Finished");
+                    /*
+                    if (serviceThread != null) {
+                        serviceThread.kill();
+                        stopSelf();
+                    }
+                    */
                     break;
                 case APPLICATION:
                     Log.d(TAG, "Service received modelChange: Application");
@@ -56,7 +64,6 @@ public class ServiceRunner extends Service implements ViewInterface{
     @Override
     public void onCreate() {
         super.onCreate();
-        controller = new Controller(this, this);
         serviceThread = new ServiceThread();
     }
 
@@ -65,13 +72,13 @@ public class ServiceRunner extends Service implements ViewInterface{
         super.onDestroy();
         serviceThread.kill();
         serviceThread = null;
-        controller = null;
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (serviceThread == null) {
             serviceThread = new ServiceThread();
+            serviceThread.start();
         }
         if (!serviceThread.alive) {
             serviceThread.start();
@@ -87,13 +94,19 @@ public class ServiceRunner extends Service implements ViewInterface{
         public void run() {
             int debug = 0;
             alive = true;
+            long sleep = 0;
             while (alive) {
-                Log.d(TAG, "running service update");
-                controller.updateApplicationAndWaitingTime();
                 try {
-                    Log.d(TAG, "sleeping service thread");
-                    Thread.sleep(300000);
-                } catch (InterruptedException e) {
+                    sleep = ServiceTimeHelper.getMsToNextRequest();
+                    Log.d(TAG, "sleeping service thread for " + sleep + " ms");
+                    Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Europe/Stockholm"));
+                    calendar.setTimeInMillis(System.currentTimeMillis() + sleep);
+                    Log.d(TAG, "thread will stop sleep at " + calendar.toString());
+                    Thread.sleep(sleep);
+                    Log.d(TAG, "running service update");
+                    new Controller(ServiceRunner.this,ServiceRunner.this).updateApplicationAndWaitingTime();
+                } catch (Exception e) {
+                    e.printStackTrace();
                     kill();
                 }
                 debug++;

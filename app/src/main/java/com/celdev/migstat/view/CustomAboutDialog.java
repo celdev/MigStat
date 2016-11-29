@@ -28,6 +28,7 @@ public class CustomAboutDialog extends AlertDialog.Builder {
         linearLayout.setOrientation(LinearLayout.VERTICAL);
         TextView textView = new TextView(context);
         textView.setText(R.string.about_message);
+        textView.setPadding(15,0,15,0);
         linearLayout.addView(textView);
         Linkify.addLinks(textView, Linkify.WEB_URLS);
         Linkify.addLinks(textView, Linkify.EMAIL_ADDRESSES);

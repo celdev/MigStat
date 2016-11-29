@@ -7,9 +7,9 @@ import com.celdev.migstat.model.WaitingTime;
 
 public interface DataStorageInterface {
 
-    Application getApplication() throws DataStorageLoadException;
+    Application getApplication() throws IncorrectStateException;
 
-    WaitingTime getWaitingTime() throws DataStorageLoadException;
+    WaitingTime getWaitingTime() throws IncorrectStateException;
 
     void loadAll() throws DataStorageLoadException;
 

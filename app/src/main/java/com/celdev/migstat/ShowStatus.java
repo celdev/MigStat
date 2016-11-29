@@ -24,6 +24,7 @@ import android.widget.TextView;
 import com.celdev.migstat.background.ServiceRunner;
 import com.celdev.migstat.controller.Controller;
 import com.celdev.migstat.controller.DataStorageLoadException;
+import com.celdev.migstat.controller.IncorrectStateException;
 import com.celdev.migstat.controller.utils.DateUtils;
 import com.celdev.migstat.model.Application;
 import com.celdev.migstat.model.NoApplicationNumberException;
@@ -36,6 +37,9 @@ import com.celdev.migstat.view.CustomNewWaitingTimeDialog;
 import com.celdev.migstat.view.CustomSetWaitingTimeDialog;
 import com.celdev.migstat.view.NumberPickerDialogReturn;
 import com.celdev.migstat.view.ViewInterface;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -72,12 +76,13 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
         changeBackground();
         try {
             loadApplication();
-        } catch (DataStorageLoadException e) {
+        } catch (DataStorageLoadException | IncorrectStateException e) {
             e.printStackTrace();
             returnToMainActivityBecauseError(R.string.alpha_incorrect_state,true);
         }
         initButtonFunctionality();
         startService(new Intent(this, ServiceRunner.class));
+        loadAd();
     }
 
 
@@ -101,10 +106,10 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
             if (!controller.hasCustomWaitingTime()) {
                 menu.findItem(R.id.menu_use_custom_waiting_time).setVisible(false);
             }
+        } else {
+            Log.d(MainActivity.LOG_KEY, "Waiting time is not loaded");
         }
-        if (customInterstitialAd == null) {
-            customInterstitialAd = new CustomInterstitialAd(controller, this);
-        }
+
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -117,6 +122,7 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
                 break;
             case WAITING_TIME:
                 processUpdateWaitingTime();
+                invalidateOptionsMenu();
                 break;
             case ERROR_UPDATE:
                 /* returned when something went wrong with parsing, shouldn't happen since
@@ -137,6 +143,7 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
             default:
                 processUpdateApplication();
                 processUpdateWaitingTime();
+                invalidateOptionsMenu();
                 Log.d(MainActivity.LOG_KEY, "got other model change enum" + modelChange.name());
         }
     }
@@ -160,15 +167,15 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
                     e.printStackTrace();
                 }
             } else {
+                findViewById(R.id.application_status_box).setVisibility(View.INVISIBLE);
                 applicationStatusText.setText("");
             }
-        } catch (DataStorageLoadException e) {
+        } catch (IncorrectStateException e) {
             e.printStackTrace();
         }
     }
 
     private void processUpdateWaitingTime() {
-
         try {
             WaitingTime waitingTime = controller.getWaitingTime();
             estimatedMonthsText.setText(waitingTime.lowMonthAndHighMonthIsEqual()?
@@ -179,9 +186,9 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
                     DateUtils.addAverageMonthsToDate(
                             application.getApplicationDate(),
                             waitingTime.getAverage()))));
-            invalidateOptionsMenu();
-        } catch (DataStorageLoadException e) {
+        } catch (IncorrectStateException e) {
             e.printStackTrace();
+            returnToMainActivityBecauseError(R.string.alpha_incorrect_state, true);
         }
     }
 
@@ -218,7 +225,7 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
         daysToDecisionText = (TextView) findViewById(R.id.avg_days_to_decision_number);
     }
 
-    private void loadApplication() throws DataStorageLoadException {
+    private void loadApplication() throws DataStorageLoadException, IncorrectStateException {
         controller.loadAll();
         application = controller.getApplication();
         controller.updateWaitingTime();
@@ -253,7 +260,7 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
         try {
             WaitingTime waitingTime = controller.getWaitingTime();
             progressBarUpdaterThread = new ProgressBarUpdaterThread(application.getApplicationDate(),waitingTime.getAverage());
-        } catch (DataStorageLoadException e) {
+        } catch (IncorrectStateException e) {
             e.printStackTrace();
         }
     }
@@ -302,7 +309,7 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
             try {
                 loadApplication();
                 refreshProgressThread();
-            } catch (DataStorageLoadException e) {
+            } catch (IncorrectStateException | DataStorageLoadException e) {
                 e.printStackTrace();
                 Log.d(MainActivity.LOG_KEY, "Incorrect state, application or waiting time is null");
                 returnToMainActivityBecauseError(R.string.alpha_incorrect_state, true);
@@ -323,6 +330,7 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
                 dialog.dismiss();
             }
         }).create().show();
+        stopService(new Intent(this, ServiceRunner.class));
         startActivity(new Intent(ShowStatus.this, MainActivity.class));
     }
 
@@ -358,6 +366,7 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
                 try {
                     Thread.sleep(250);
                 } catch (InterruptedException e) {
+                    e.printStackTrace();
                     kill();
                 }
             }
@@ -419,34 +428,50 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
                     @Override
                     public void returnOnOk(int months) {
                         controller.setAndUseCustomWaitingTime(months);
+                        refreshAfterWaitingTimeChange();
                     }
                 }).createAndShow();
-                processUpdateWaitingTime();
-                refreshButton.performClick();
                 return true;
             case R.id.menu_use_custom_waiting_time:
                 controller.setWaitingTimeMode(true);
-                processUpdateWaitingTime();
-                refreshButton.performClick();
+                refreshAfterWaitingTimeChange();
                 return true;
             case R.id.menu_use_migrationverket_waiting_time:
                 controller.setWaitingTimeMode(false);
                 processUpdateWaitingTime();
-                refreshButton.performClick();
                 return true;
             case R.id.menu_unlock_theme:
+                Log.d(MainActivity.LOG_KEY, "Loading ad");
                 customInterstitialAd.show();
+
                 return true;
             case R.id.menu_change_bg:
                 setChangeBackgroundMode();
                 return true;
             case R.id.menu_reset_application:
                 controller.deleteAll();
+                stopService(new Intent(this, ServiceRunner.class));
                 startActivity(new Intent(this, MainActivity.class));
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
 
+    private void loadAd() {
+        if (customInterstitialAd == null) {
+            customInterstitialAd = new CustomInterstitialAd(controller, this);
+        }
+
+        MobileAds.initialize(getApplicationContext(), "ca-app-pub-3940256099942544~3347511713");
+        AdView adView = (AdView) findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        adView.loadAd(adRequest);
+    }
+
+    private void refreshAfterWaitingTimeChange() {
+        processUpdateWaitingTime();
+        invalidateOptionsMenu();
+        refreshButton.callOnClick();
     }
 
     private void setChangeBackgroundMode() {

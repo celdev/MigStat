@@ -22,7 +22,7 @@ public class Controller implements DataStorageInterface {
     private static WaitingTime waitingTime;
 
     public boolean waitingTimeIsLoaded() {
-        return application.getWaitingTime() != null;
+        return waitingTime != null;
     }
 
     public enum ApplicationState {
@@ -68,7 +68,7 @@ public class Controller implements DataStorageInterface {
     }
 
     public boolean isUsingCustomWaitingTime() {
-        return application.getWaitingTime().isUseCustomMonths();
+        return waitingTime.isUseCustomMonths();
     }
 
     public boolean hasWaitingTimeQuery() {
@@ -76,7 +76,7 @@ public class Controller implements DataStorageInterface {
     }
 
     public boolean hasCustomWaitingTime() {
-        return application.getWaitingTime().hasCustomWaitingTime();
+        return waitingTime.hasCustomWaitingTime();
     }
 
     public void updateWaitingTime() {
@@ -99,9 +99,9 @@ public class Controller implements DataStorageInterface {
     }
 
     @Override
-    public Application getApplication() throws DataStorageLoadException {
+    public Application getApplication() throws IncorrectStateException {
         if (application == null) {
-            application = DataStorage.getInstance().loadApplication(context);
+            throw new IncorrectStateException();
         }
         return application;
     }
@@ -235,10 +235,9 @@ public class Controller implements DataStorageInterface {
     }
 
     @Override
-    public WaitingTime getWaitingTime() throws DataStorageLoadException {
+    public WaitingTime getWaitingTime() throws IncorrectStateException {
         if (waitingTime == null) {
-            waitingTime = DataStorage.getInstance().loadWaitingTime(context);
-            application.setWaitingTimeReturnBothIfNewer(waitingTime);
+            throw new IncorrectStateException();
         }
         return waitingTime;
     }
@@ -248,6 +247,7 @@ public class Controller implements DataStorageInterface {
         DataStorage dataStorage = DataStorage.getInstance();
         application = dataStorage.loadApplication(context);
         waitingTime = dataStorage.loadWaitingTime(context);
+        application.setWaitingTime(waitingTime);
     }
 
     @Override
@@ -272,6 +272,8 @@ public class Controller implements DataStorageInterface {
         application = null;
         waitingTime = null;
     }
+
+
 
     public boolean resetBecauseNewVersion() {
         return DataStorage.getInstance().checkVersionResetIfNeeded(context);

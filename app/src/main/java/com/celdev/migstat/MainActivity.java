@@ -10,6 +10,7 @@ import android.graphics.drawable.Drawable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -90,9 +91,34 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
         initSwitch();
         initRadioButtons();
         initButtons();
+        setupApplicationOKButtonFunction();
         initNumberField();
         initProgressDialog();
         checkState();
+    }
+
+
+
+    private void setupApplicationOKButtonFunction() {
+        checkStatusButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                doStatusCheck();
+            }
+        });
+        afterSetDateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (application != null) {
+                    controller.saveApplication(application);
+                    setLockMode(ViewLockMode.APPLICATION_LOCK);
+                }
+            }
+        });
+        checkStatusButton.setText(R.string.ok);
+        afterSetDateButton.setText(R.string.ok);
+        findViewById(R.id.setup_application_ok_text).setVisibility(View.INVISIBLE);
+        findViewById(R.id.set_date_application_ok_text).setVisibility(View.INVISIBLE);
     }
 
     @Override
@@ -146,12 +172,7 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
 
     private void initButtons() {
         checkStatusButton = (Button) findViewById(R.id.check_status_button);
-        checkStatusButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                doStatusCheck();
-            }
-        });
+
 
         setDateButton = (Button) findViewById(R.id.set_application_date_button);
         setDateButton.setOnClickListener(new View.OnClickListener() {
@@ -164,15 +185,7 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
 
 
         afterSetDateButton = (Button) findViewById(R.id.after_set_date_button);
-        afterSetDateButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (application != null) {
-                    controller.saveApplication(application);
-                    setLockMode(ViewLockMode.APPLICATION_LOCK);
-                }
-            }
-        });
+
 
         initWaitingTimeButtons();
     }
@@ -180,7 +193,9 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
     @Override
     protected void onResume() {
         super.onResume();
-        controller = new Controller(this, this);
+        Log.d(LOG_KEY, "Main activity onResume called");
+        Log.d(LOG_KEY, "controller is null = " + (controller == null));
+        checkState();
     }
 
 
@@ -324,6 +339,8 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
         useNumberSwitch.setEnabled(true);
         checkStatusButton.setEnabled(true);
         afterSetDateButton.setEnabled(false);
+        setDateButton.setEnabled(true);
+        setupApplicationOKButtonFunction();
     }
 
     private void lockApplicationAfterDownload() {
@@ -331,13 +348,11 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
         checkRadioButton.setEnabled(false);
         caseRadioButton.setEnabled(false);
         applicationNumberField.setEnabled(false);
-        checkStatusButton.setEnabled(false);
     }
 
     private void lockApplicationAfterSetDate() {
         useNumberSwitch.setEnabled(false);
         setDateButton.setEnabled(false);
-        afterSetDateButton.setEnabled(false);
     }
 
     private ApplicationNumberType getApplicationNumberType() {
@@ -366,6 +381,29 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
         } else {
             applicationNumberField.setCompoundDrawablesWithIntrinsicBounds(0,0,android.R.drawable.ic_delete,0);
         }
+    }
+
+    private void setOKButtonCancelMode() {
+        checkStatusButton.setText(R.string.cancel);
+        afterSetDateButton.setText(R.string.cancel);
+        checkStatusButton.setEnabled(true);
+        afterSetDateButton.setEnabled(true);
+        findViewById(R.id.setup_application_ok_text).setVisibility(View.VISIBLE);
+        findViewById(R.id.set_date_application_ok_text).setVisibility(View.VISIBLE);
+        checkStatusButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                controller.deleteAll();
+                setLockMode(ViewLockMode.UNLOCK_APPLICATION);
+            }
+        });
+        afterSetDateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                controller.deleteAll();
+                setLockMode(ViewLockMode.UNLOCK_APPLICATION);
+            }
+        });
     }
 
     @Override
@@ -418,6 +456,7 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
     private void setLockMode(ViewLockMode viewLockMode) {
         switch (viewLockMode) {
             case APPLICATION_LOCK:
+                setOKButtonCancelMode();
                 enableWaitingTimeButtons();
                 lockApplicationAfterDownload();
                 lockApplicationAfterSetDate();
@@ -428,6 +467,7 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
                 break;
             case UNLOCK_APPLICATION:
                 nullApplication();
+
                 break;
         }
     }

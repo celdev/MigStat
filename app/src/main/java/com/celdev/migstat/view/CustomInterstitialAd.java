@@ -39,8 +39,9 @@ public class CustomInterstitialAd {
     }
 	
 	private void doAdRequest(){
-		AdRequest adRequest = new AdRequest.Builder().
+        AdRequest adRequest = new AdRequest.Builder().
                 addTestDevice(AdRequest.DEVICE_ID_EMULATOR).
+                addTestDevice(context.getString(R.string.lgdevice)).
                 build();
         interstitialAd.loadAd(adRequest);
 	}
@@ -49,11 +50,7 @@ public class CustomInterstitialAd {
 
     public void show() {
         if (interstitialAd.isLoaded()) {
-            try {
-                interstitialAd.show();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            interstitialAd.show();
         }
     }
 

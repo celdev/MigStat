@@ -78,6 +78,29 @@
                     android:layout_alignParentEnd="true"
                     />
 
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:visibility="invisible"
+                    android:layout_below="@+id/number_field"
+                    android:layout_alignParentStart="true"
+                    android:layout_marginTop="12dp"
+                    tools:ignore="UseCompoundDrawables"
+                    android:id="@+id/setup_application_ok_text">
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_ok"
+                        android:contentDescription="@string/ok" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/application_setup_ok_text"
+                        android:id="@+id/application_setup_text"
+                        android:paddingTop="4dp"
+                        />
+                </LinearLayout>
 
 
             </RelativeLayout>
@@ -101,6 +124,7 @@
                     android:layout_below="@id/set_application_date_button"
                     android:text="@string/set_your_application_date"/>
 
+
                 <Button
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -111,9 +135,30 @@
                     android:text="@string/ok"
                     />
 
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:visibility="invisible"
+                    android:layout_below="@+id/after_set_date_button"
+                    android:layout_alignParentStart="true"
+                    android:layout_marginTop="12dp"
+                    tools:ignore="UseCompoundDrawables"
+                    android:id="@+id/set_date_application_ok_text">
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_ok"
+                        android:contentDescription="@string/ok" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/application_setup_ok_text"
+                        android:paddingTop="4dp"
+                        />
+                </LinearLayout>
+
             </RelativeLayout>
-
-
 
         </ViewSwitcher>
 

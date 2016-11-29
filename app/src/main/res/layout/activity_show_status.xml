@@ -132,17 +132,34 @@
 
             </LinearLayout>
 
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="@dimen/top_info_padding"
+                android:paddingEnd="@dimen/top_info_padding"
+                android:paddingStart="@dimen/top_info_padding"
+                android:paddingBottom="@dimen/top_info_padding"
+                android:background="@drawable/info_background"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:id="@+id/application_status_box">
 
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="@dimen/show_status_info_text_size_big"
+                        android:lines="2"
+                        android:gravity="center_horizontal"
+                        android:id="@+id/application_status_text"
+                        android:text="@string/loading..."
+                        />
+
+            </RelativeLayout>
         </RelativeLayout>
+
     </RelativeLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="25dp"
-        android:id="@+id/change_bg_view"
-        android:orientation="horizontal"
-        android:layout_alignParentBottom="true"
-        />
+
 
     <FrameLayout
         android:layout_width="wrap_content"
@@ -166,17 +183,8 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:layout_gravity="center"
-            android:layout_marginTop="10dp">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/application_status_text"
-                android:text="@string/loading..."
-                android:gravity="center_horizontal"
-                android:textColor="@color/white"
-                android:layout_gravity="center"
-                android:textSize="@dimen/progress_status_text_size"
-                />
+            android:layout_marginTop="15dp">
+
 
             <TextView
                 android:layout_width="wrap_content"
@@ -191,11 +199,9 @@
                 android:layout_width="@dimen/reload_button"
                 android:layout_height="@dimen/reload_button"
                 android:scaleType="fitXY"
-                android:src="@drawable/ic_reload"
                 android:id="@+id/progress_reload_button"
-                android:background="@color/transparent"
+                android:background="@drawable/refresh_button_drawable"
                 android:tint="@color/white"
-                android:layout_marginTop="15dp"
                 android:layout_gravity="center"
                 android:contentDescription="@string/reload_button" />
         </LinearLayout>
@@ -204,5 +210,23 @@
 
     </FrameLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="25dp"
+        android:id="@+id/change_bg_view"
+        android:orientation="horizontal"
+        android:layout_above="@+id/adView"
+        />
+
+    <com.google.android.gms.ads.AdView
+        xmlns:ads="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/adView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        ads:adSize="BANNER"
+        ads:adUnitId="@string/banner_ad_unit_id">
+    </com.google.android.gms.ads.AdView>
 
 </RelativeLayout>

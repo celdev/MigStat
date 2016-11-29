@@ -42,7 +42,9 @@ public class SimpleCaseStatusParser {
             throw new ParserException("Extracted list has wrong amount of elements inside");
         }
         StatusType statusType = null;
-        for(int i = 0; i < 2; i++) {
+        Log.d(MainActivity.LOG_KEY, elements.outerHtml());
+        for(int i = 0; i <= 2; i++) {
+            Log.d(MainActivity.LOG_KEY, elements.get(i).outerHtml());
             if (elements.get(i).hasClass(LIST_ELEMENT_ACTIVE_CLASS)) {
                 statusType = StatusType.statusNumberToStatusType(i);
             }

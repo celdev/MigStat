@@ -27,11 +27,11 @@
     <dimen name="show_status_info_text_size">16sp</dimen>
     <dimen name="reload_button">35dp</dimen>
     <dimen name="info_spacing">10dp</dimen>
-    <dimen name="show_status_info_text_size_big">20sp</dimen>
+    <dimen name="show_status_info_text_size_big">17sp</dimen>
     <dimen name="info_background_corner_radius">7dp</dimen>
     <dimen name="top_info_padding">8dp</dimen>
     <dimen name="mid_info_padding">20dp</dimen>
-    <dimen name="mid_info_box_width">100dp</dimen>
+    <dimen name="mid_info_box_width">90dp</dimen>
     <dimen name="info_border_width">2dp</dimen>
     <dimen name="progress_status_text_size">16sp</dimen>
 </resources>
