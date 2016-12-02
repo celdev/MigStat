@@ -17,7 +17,7 @@ public class CustomSetWaitingTimeDialog extends AlertDialog.Builder {
         numberPicker.setMaxValue(36);
         numberPicker.setMinValue(1);
         LinearLayout linearLayout = new LinearLayout(context);
-        linearLayout.setOrientation(LinearLayout.HORIZONTAL);
+        linearLayout.setOrientation(LinearLayout.VERTICAL);
         TextView textView = new TextView(context);
         textView.setText(R.string.choose_months);
         linearLayout.addView(textView);

@@ -4,6 +4,8 @@ import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -95,6 +97,7 @@ public class ApplicationTypeWebViewActivity extends AppCompatActivity implements
 
         private static final String FINAL_REQUEST_KEYWORD = "history";
 
+        @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
         @Override
         public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
             if (requestIsSendQuery("" + request.getUrl())) {
@@ -109,20 +112,31 @@ public class ApplicationTypeWebViewActivity extends AppCompatActivity implements
             return super.shouldInterceptRequest(view, request);
         }
 
-
-
+        @Override
+        public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
+            if (requestIsSendQuery("" + url)) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        initProgressDialog();
+                    }
+                });
+                saveQuery("" + url);
+            }
+            return super.shouldInterceptRequest(view, url);
+        }
 
         /*  Called when the page is finished
-        *   removes the progress dialog.
-        *
-        *   if the url loaded isn't the same as the "check waitingtime"-page the
-        *   webview will be redirected there so that the
-        *   user can't access other page through this webview
-        *   shows a dialog about why the users is redirected
-        *
-        *   shouldOverrideUrlLoading() isn't called for some types of Urls
-        *   so this seems to be the current "best" workaround
-        * */
+                *   removes the progress dialog.
+                *
+                *   if the url loaded isn't the same as the "check waitingtime"-page the
+                *   webview will be redirected there so that the
+                *   user can't access other page through this webview
+                *   shows a dialog about why the users is redirected
+                *
+                *   shouldOverrideUrlLoading() isn't called for some types of Urls
+                *   so this seems to be the current "best" workaround
+                * */
         @Override
         public void onPageFinished(WebView view, String url) {
             dismissProgressDialogAndShowWhatToDoDialog();

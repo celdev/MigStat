@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.DrawableRes;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -60,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
     private RadioButton caseRadioButton, checkRadioButton;
     private EditText applicationNumberField;
     private Button checkStatusButton, setDateButton, afterSetDateButton, customWaitingTimeButton;
-    private ImageButton waitingTimeButtonEng, waitingTimeButtonSwe;
+    private Button waitingTimeButtonEng, waitingTimeButtonSwe;
 
     private ViewSwitcher replaceView;
     private View useNumberView, useNoNumberView;
@@ -204,35 +205,39 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
         waitingTimeButtonSwe.setEnabled(false);
         waitingTimeButtonEng.setEnabled(false);
         customWaitingTimeButton.setEnabled(false);
-        Drawable grayEngFlag = getDrawable(R.drawable.ic_flag_of_the_united_kingdom);
-        Drawable graySweFlag = getDrawable(R.drawable.ic_flag_of_sweden);
-        if (grayEngFlag != null && graySweFlag != null) {
-            grayEngFlag.mutate();
-            graySweFlag.mutate();
-            grayEngFlag.setColorFilter(Color.GRAY, PorterDuff.Mode.ADD);
-            graySweFlag.setColorFilter(Color.GRAY, PorterDuff.Mode.ADD);
-            waitingTimeButtonEng.setImageDrawable(grayEngFlag);
-            waitingTimeButtonSwe.setImageDrawable(graySweFlag);
+        /*Drawable grayEngFlag = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            grayEngFlag = getDrawable(R.drawable.ic_flag_of_the_united_kingdom);
+            Drawable graySweFlag = getDrawable(R.drawable.ic_flag_of_sweden);
+            if (grayEngFlag != null && graySweFlag != null) {
+                grayEngFlag.mutate();
+                graySweFlag.mutate();
+                grayEngFlag.setColorFilter(Color.GRAY, PorterDuff.Mode.ADD);
+                graySweFlag.setColorFilter(Color.GRAY, PorterDuff.Mode.ADD);
+                waitingTimeButtonEng.setImageDrawable(grayEngFlag);
+                waitingTimeButtonSwe.setImageDrawable(graySweFlag);
 
-        }
+            }
+        }*/
     }
 
     private void enableWaitingTimeButtons() {
         waitingTimeButtonSwe.setEnabled(true);
         waitingTimeButtonEng.setEnabled(true);
         customWaitingTimeButton.setEnabled(true);
-        Drawable grayEngFlag = getDrawable(R.drawable.ic_flag_of_the_united_kingdom);
-        Drawable graySweFlag = getDrawable(R.drawable.ic_flag_of_sweden);
-        if (grayEngFlag != null && graySweFlag != null) {
-            waitingTimeButtonEng.setImageDrawable(grayEngFlag);
-            waitingTimeButtonSwe.setImageDrawable(graySweFlag);
+        /*if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            Drawable grayEngFlag = getDrawable(R.drawable.ic_flag_of_the_united_kingdom);
+            Drawable graySweFlag = getDrawable(R.drawable.ic_flag_of_sweden);
+            if (grayEngFlag != null && graySweFlag != null) {
+                waitingTimeButtonEng.setImageDrawable(grayEngFlag);
+                waitingTimeButtonSwe.setImageDrawable(graySweFlag);
 
-        }
-
+            }
+        }*/
     }
 
     private void initWaitingTimeButtons() {
-        waitingTimeButtonEng = (ImageButton) findViewById(R.id.waitingtime_launcher_eng);
+        waitingTimeButtonEng = (Button) findViewById(R.id.waitingtime_launcher_eng);
         waitingTimeButtonEng.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -241,7 +246,7 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
             }
         });
 
-        waitingTimeButtonSwe = (ImageButton) findViewById(R.id.waitingtime_launcher_swe);
+        waitingTimeButtonSwe = (Button) findViewById(R.id.waitingtime_launcher_swe);
         waitingTimeButtonSwe.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

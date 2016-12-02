@@ -20,7 +20,9 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingStart="@dimen/top_info_padding"
+            android:paddingLeft="@dimen/top_info_padding"
             android:paddingEnd="@dimen/top_info_padding"
+            android:paddingRight="@dimen/top_info_padding"
             android:id="@+id/estimated_months_and_application_date_layout"
             android:background="@drawable/info_background">
             <LinearLayout
@@ -113,7 +115,7 @@
                 android:orientation="vertical"
                 android:background="@drawable/info_background"
                 android:layout_alignParentEnd="true"
-                >
+                android:layout_alignParentRight="true">
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -218,15 +220,15 @@
         android:layout_above="@+id/adView"
         />
 
-    <com.google.android.gms.ads.AdView
-        xmlns:ads="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/adView"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:id="@+id/adView"
         android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true"
-        ads:adSize="BANNER"
-        ads:adUnitId="@string/banner_ad_unit_id">
-    </com.google.android.gms.ads.AdView>
+        android:orientation="horizontal">
+
+    </LinearLayout>
+
 
 </RelativeLayout>

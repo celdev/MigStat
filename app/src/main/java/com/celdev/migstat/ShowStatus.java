@@ -1,11 +1,14 @@
 package com.celdev.migstat;
 
+import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Build;
 import android.support.annotation.StringRes;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -14,7 +17,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -38,6 +40,7 @@ import com.celdev.migstat.view.CustomSetWaitingTimeDialog;
 import com.celdev.migstat.view.NumberPickerDialogReturn;
 import com.celdev.migstat.view.ViewInterface;
 import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 
@@ -45,6 +48,21 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
+/*  This class contains the Activity that shows the information and status about
+*   an application with the swedish migration agency.
+*
+*   it will show:
+*       * when the application was made
+*       * average waiting time (custom or migrationsverkets estimate)
+*       * days waited
+*       * days until decision (average)
+*       * progress (in percent)
+*     if using application number it will also show
+*       * application status
+*
+*  it is also possible for the user to customize this Activity in terms of changing the
+*  background-picture.
+* */
 public class ShowStatus extends AppCompatActivity implements ViewInterface {
 
     private Application application;
@@ -52,7 +70,7 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
     private ImageButton refreshButton;
     private TextView applicationDateTextView, progressBarText, estimatedMonthsText, applicationStatusText;
     private TextView daysSinceApplicationText, daysToDecisionText;
-    private FrameLayout progressBarFrame;
+    private AdView adView;
 
     private LinearLayout changeBgView;
     private ProgressBarUpdaterThread progressBarUpdaterThread;
@@ -70,22 +88,46 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(MainActivity.LOG_KEY, "onCreate called");
+
+        //used so that we can determind if onResume was called directly after this method
         fromOnCreate = true;
+
+        //sets the layout to be used in this activity
         setContentView(R.layout.activity_show_status);
+
+        //fetches references to the views in the layout
         initViews();
+        //sets the correct background
         changeBackground();
         try {
+            //try to load the application information from the DataStorage (through the controller)
             loadApplication();
         } catch (DataStorageLoadException | IncorrectStateException e) {
+            //an exception will be thrown if there's a problem in loading the application information
+            //the user will then be forced back to the MainActivity and have to provide the
+            //correct information (again)
             e.printStackTrace();
             returnToMainActivityBecauseError(R.string.alpha_incorrect_state,true);
         }
+
+        //initializes the button click functionality
         initButtonFunctionality();
+
+        //starts the background "check application status"-service
         startService(new Intent(this, ServiceRunner.class));
+
+        //initializes the ads
+        initAd();
+        //loads an ad into the banner ad
         loadAd();
     }
 
 
+    /*  Makes sure the ActionBar menu's items are in the correct state
+    *   Depending on the state of the WaitingTime-object and
+    *
+    *   if the change background-item should be unlocked.
+    * */
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         Log.d(MainActivity.LOG_KEY, "onPrepareOptionsMenu called");
@@ -113,6 +155,9 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
         return super.onPrepareOptionsMenu(menu);
     }
 
+    /*  This method is called when the controller finishes an Async operation
+    *   different operations will send different ModelChange-objects to this method
+    * */
     @Override
     public void modelChange(ModelChange modelChange) {
         disableRefreshAnimation();
@@ -148,11 +193,15 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
         }
     }
 
+    /*  creates and shows a dialog containing the information
+    *   that the application number used have gotten a decision
+    * */
     private void processGotDecision() {
         new CustomGotDecisionDialog(this).create().show();
-
     }
 
+    /*  Sets the application status text
+    * */
     private void processUpdateApplication() {
         Log.d(MainActivity.LOG_KEY, "updating progress from application progressUpdateApplication");
         try {
@@ -175,6 +224,9 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
         }
     }
 
+    /*  sets the text of the waiting time GUI elements
+    *   to the information contained in the WaitingTime-object
+    * */
     private void processUpdateWaitingTime() {
         try {
             WaitingTime waitingTime = controller.getWaitingTime();
@@ -192,6 +244,8 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
         }
     }
 
+    /*  sets the functionality of the refresh button
+    * */
     private void initButtonFunctionality() {
         refreshButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -201,6 +255,9 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
         });
     }
 
+    /*  rotates the refresh button when it's pressed
+    *   and calls the controller to update the application status and waiting time
+    * */
     private void rotateRefreshButton() {
         final Animation ani = new RotateAnimation(0, 360, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
         ani.setDuration(500);
@@ -211,6 +268,8 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
         controller.updateApplicationAndWaitingTime();
     }
 
+    /*  Fetches the view
+    * */
     private void initViews() {
         root = (RelativeLayout) findViewById(R.id.activity_show_status);
         progressBar = (ProgressBar) findViewById(R.id.progress_bar);
@@ -218,13 +277,18 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
         applicationDateTextView = (TextView) findViewById(R.id.application_date_number);
         progressBarText = (TextView) findViewById(R.id.progress_bar_text);
         estimatedMonthsText = (TextView) findViewById(R.id.estimated_months_number);
-        progressBarFrame = (FrameLayout) findViewById(R.id.progress_bar_frame);
         applicationStatusText = (TextView) findViewById(R.id.application_status_text);
         changeBgView = (LinearLayout)findViewById(R.id.change_bg_view);
         daysSinceApplicationText = (TextView) findViewById(R.id.days_since_application_number);
         daysToDecisionText = (TextView) findViewById(R.id.avg_days_to_decision_number);
     }
 
+    /*  Loads the application and forces an update of the application status and
+    *   the waiting time.
+    *
+    *   throws an error if the application or waiting time isn't in a correct state
+    *   (which should mean that the user shouldn't be in this activity)
+    * */
     private void loadApplication() throws DataStorageLoadException, IncorrectStateException {
         controller.loadAll();
         application = controller.getApplication();
@@ -232,12 +296,17 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
         controller.updateApplication();
     }
 
+    /*  sets the text of some of the application GUI elements to the
+    *   information contained in the Application-object
+    * */
     private void setApplicationViewInformation() {
         Log.d(MainActivity.LOG_KEY, "updating progress from application");
         applicationDateTextView.setText(DateUtils.msToDateString(application.getApplicationDate()));
         daysSinceApplicationText.setText(getString(R.string.integer_placeholder, DateUtils.daysWaited(application.getApplicationDate())));
     }
 
+    /*  Disables the animation of the refresh button
+    * */
     private void disableRefreshAnimation() {
         final Animation animation = refreshButton.getAnimation();
         if (animation != null) {
@@ -247,11 +316,15 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
     }
 
 
-
+    /*  shows a dialog with the information that the average waiting time
+    *   from migrationsverket has been updated
+    * */
     private void handleCheckOldNewWaitingTime() {
         new CustomNewWaitingTimeDialog(this).create().show();
     }
 
+    /*  kills the progressbar updating thread and starts a new one
+    * */
     private void refreshProgressThread() {
         if (progressBarUpdaterThread != null) {
             progressBarUpdaterThread.kill();
@@ -343,16 +416,20 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
 
         private long startDateMS, estimatedEndDateMS;
 
+        /*  passes the information needed to calculate the progress and
+        *   starts the thread
+        * */
         private ProgressBarUpdaterThread(long startDateMS, double averageMonths) {
             this.startDateMS = startDateMS;
             this.estimatedEndDateMS = DateUtils.addAverageMonthsToDate(startDateMS, averageMonths);
             start();
         }
 
+        /*  updates the progressbar and progressbar text every 250ms
+        * */
         @Override
         public void run() {
-
-            final DecimalFormat decimalFormat = new DecimalFormat("0.######", DecimalFormatSymbols.getInstance(Locale.forLanguageTag("se")));
+            final DecimalFormat decimalFormat = new DecimalFormat("0.######", DecimalFormatSymbols.getInstance(Locale.getDefault()));
             decimalFormat.setMinimumFractionDigits(6);
             while (alive) {
                 final double percent = calculateProgress();
@@ -384,12 +461,21 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
         }
     }
 
+    /*  this method is called when this activity is shut down
+    *   calls for the controller to save all data
+    * */
     @Override
     protected void onDestroy() {
         super.onDestroy();
         controller.saveAll();
     }
 
+
+    /*  This method is called when the user presses an hardware button
+    *   overrides the back-key functionality so that the app is
+    *   moved to the background instead of taking the user to the
+    *   activity before this.
+    * */
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
@@ -402,6 +488,9 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
     }
 
 
+    /*  This method is called when the ActionBar menu is to be created.
+    *   creates the menu using the show_menu.xml file in the menu resource folder.
+    * */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
@@ -413,17 +502,20 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
         return true;
     }
 
+    /*  This method is called when a menu item is clicked
+    * */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.menu_about:
+            case R.id.menu_about:               //shows the about dialog
                 showAboutDialog();
                 return true;
-            case R.id.menu_set_case_type:
+            case R.id.menu_set_case_type:       //starts the webview-activity for getting
+                                                //migrationsverket average time to decision
                 Intent intent = new Intent(this, ApplicationTypeWebViewActivity.class);
                 startActivity(intent);
                 return true;
-            case R.id.menu_set_custom_waiting_time:
+            case R.id.menu_set_custom_waiting_time:     //sets the custom waiting time
                 new CustomSetWaitingTimeDialog(this, new NumberPickerDialogReturn() {
                     @Override
                     public void returnOnOk(int months) {
@@ -432,24 +524,23 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
                     }
                 }).createAndShow();
                 return true;
-            case R.id.menu_use_custom_waiting_time:
-                controller.setWaitingTimeMode(true);
+            case R.id.menu_use_custom_waiting_time:     //sets the waiting time mode to
+                controller.setWaitingTimeMode(true);    //custom waiting time
                 refreshAfterWaitingTimeChange();
                 return true;
-            case R.id.menu_use_migrationverket_waiting_time:
-                controller.setWaitingTimeMode(false);
+            case R.id.menu_use_migrationverket_waiting_time:    //sets the waiting time mode to
+                controller.setWaitingTimeMode(false);           //migrationsverket waiting time
                 processUpdateWaitingTime();
                 return true;
-            case R.id.menu_unlock_theme:
-                Log.d(MainActivity.LOG_KEY, "Loading ad");
+            case R.id.menu_unlock_theme:                        //shows an ad and unlocks the
+                Log.d(MainActivity.LOG_KEY, "Loading ad");      //change background functionality
                 customInterstitialAd.show();
-
                 return true;
-            case R.id.menu_change_bg:
+            case R.id.menu_change_bg:                           //starts the change background mode
                 setChangeBackgroundMode();
                 return true;
-            case R.id.menu_reset_application:
-                controller.deleteAll();
+            case R.id.menu_reset_application:                   //resets the application and starts
+                controller.deleteAll();                         //the MainActivity
                 stopService(new Intent(this, ServiceRunner.class));
                 startActivity(new Intent(this, MainActivity.class));
             default:
@@ -457,27 +548,59 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
         }
     }
 
-    private void loadAd() {
+    /*  Initializes the banner ad and interstitial ad
+    *   checks if the device screen can fit a AdSize.Banner sized ad
+    *   if not it sets the ad size to little bit less than the available screen width
+    * */
+    private void initAd() {
+        LinearLayout linearAdView = (LinearLayout) findViewById(R.id.adView);
+        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+        float dpWidth = (displayMetrics.widthPixels / displayMetrics.density) - 36;
+        Log.d(MainActivity.LOG_KEY, "dp width is" + dpWidth);
+        this.adView = new AdView(this);
+        if (dpWidth < 320) {
+            adView.setAdSize(new AdSize((int) dpWidth, 50));
+        } else {
+            adView.setAdSize(AdSize.BANNER);
+        }
+        adView.setAdUnitId(getString(R.string.banner_ad_unit_id));
+        linearAdView.addView(adView);
         if (customInterstitialAd == null) {
             customInterstitialAd = new CustomInterstitialAd(controller, this);
         }
-
         MobileAds.initialize(getApplicationContext(), "ca-app-pub-3940256099942544~3347511713");
-        AdView adView = (AdView) findViewById(R.id.adView);
+    }
+
+    /*  Load the ad to the banner
+    * */
+    private void loadAd() {
         AdRequest adRequest = new AdRequest.Builder().build();
         adView.loadAd(adRequest);
     }
 
+    /*  Updates the GUI (including the ActionBar menu)
+    *   after the waiting time have change
+    *   for example if the user change to custom months or
+    *   change to use migrationsverket average
+    * */
     private void refreshAfterWaitingTimeChange() {
         processUpdateWaitingTime();
         invalidateOptionsMenu();
-        refreshButton.callOnClick();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
+            refreshButton.callOnClick();
+        } else {
+            refreshButton.performClick();
+        }
     }
 
+    /*  initializes the background changer-helper object
+    * */
     private void setChangeBackgroundMode() {
         new BackgroundChanger(controller,root, changeBgView, this);
     }
 
+    /*  creates and shows the about dialog.
+    * */
     private void showAboutDialog() {
         new CustomAboutDialog(this).createAndShow();
     }
@@ -486,11 +609,23 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
         changeBgView.removeAllViewsInLayout();
     }
 
+    /*  Changes the background on startup
+    *   uses different methods depending on the API level
+    * */
+    @SuppressLint("NewApi")
     private void changeBackground() {
         int backgroundIndex = controller.loadBackground();
         int[] backgrounds = BackgroundChanger.drawables;
         if (backgroundIndex > 0 && backgroundIndex < backgrounds.length) {
-            root.setBackground(getDrawable(backgrounds[backgroundIndex]));
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    root.setBackground(getDrawable(backgrounds[backgroundIndex]));
+                } else {
+                    root.setBackground(getResources().getDrawable(backgrounds[backgroundIndex]));
+                }
+            } else {
+                root.setBackgroundDrawable(getResources().getDrawable(backgrounds[backgroundIndex]));
+            }
         }
     }
 }

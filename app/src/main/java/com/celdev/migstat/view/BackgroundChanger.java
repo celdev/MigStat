@@ -1,6 +1,7 @@
 package com.celdev.migstat.view;
 
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -63,13 +64,21 @@ public class BackgroundChanger {
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                root.setBackground(getPrefBackground());
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    root.setBackground(getPrefBackground());
+                } else {
+                    root.setBackgroundDrawable(getPrefBackground());
+                }
             }
         });
         next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                root.setBackground(getNextBackground());
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    root.setBackground(getNextBackground());
+                }else {
+                    root.setBackgroundDrawable(getPrefBackground());
+                }
             }
         });
         ok.setOnClickListener(new View.OnClickListener() {
@@ -87,7 +96,11 @@ public class BackgroundChanger {
         } else {
             currentBG--;
         }
-        return activity.getDrawable(drawables[currentBG]);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            return activity.getDrawable(drawables[currentBG]);
+        } else {
+            return activity.getResources().getDrawable(drawables[currentBG]);
+        }
     }
 
     private Drawable getNextBackground() {
@@ -96,7 +109,11 @@ public class BackgroundChanger {
         } else {
             currentBG++;
         }
-        return activity.getDrawable(drawables[currentBG]);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            return activity.getDrawable(drawables[currentBG]);
+        } else {
+            return activity.getResources().getDrawable(drawables[currentBG]);
+        }
     }
 
     private void saveNewBackground() {

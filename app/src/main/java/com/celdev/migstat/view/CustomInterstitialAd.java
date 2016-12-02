@@ -11,12 +11,19 @@ import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
 
+/*  This class contains methods for loading and showing
+*   an interstitial ad.
+*
+*   when the ad is closes the background-changing functionality will be unlocked
+* */
 public class CustomInterstitialAd {
 
     private Context context;
     private InterstitialAd interstitialAd;
     private Controller controller;
 
+    /*  initializes the ad
+    * */
     public CustomInterstitialAd(Controller controller, Context context) {
         this.context = context;
         this.controller = controller;
@@ -24,6 +31,11 @@ public class CustomInterstitialAd {
         initAd();
     }
 
+    /*  initializes the ad functionality
+    *   when the "onClose"-method is called (when the ad is closed)
+    *   the background-changing-functionality will be unlocked
+    *   and a new ad will be loaded into the interstitial ad
+    * */
     private void initAd() {
         interstitialAd.setAdUnitId(context.getString(R.string.ad_unit_id));
         interstitialAd.setAdListener(new AdListener() {
@@ -37,7 +49,9 @@ public class CustomInterstitialAd {
         });
 		doAdRequest();
     }
-	
+
+    /*  requests a new interstitial ad
+    * */
 	private void doAdRequest(){
         AdRequest adRequest = new AdRequest.Builder().
                 addTestDevice(AdRequest.DEVICE_ID_EMULATOR).
@@ -46,11 +60,15 @@ public class CustomInterstitialAd {
         interstitialAd.loadAd(adRequest);
 	}
 
-
-
+    /*  if the ad is loaded the ad will be shown
+    *   otherwise the "change background"-functionality will be unlocked
+    *   without showing an ad
+    * */
     public void show() {
         if (interstitialAd.isLoaded()) {
             interstitialAd.show();
+        } else {
+            controller.saveEnableThemes();
         }
     }
 

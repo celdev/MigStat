@@ -116,5 +116,7 @@
     <string name="lgdevice">99D6309733F78C74EAFF74EEAB06ACD1</string>
     <string name="ad_unit_id">ca-app-pub-3940256099942544/6300978111</string>
     <string name="banner_ad_unit_id">ca-app-pub-3940256099942544/6300978111</string>
+    <string name="english">English</string>
+    <string name="swedish">Svenska</string>
 
 </resources>
