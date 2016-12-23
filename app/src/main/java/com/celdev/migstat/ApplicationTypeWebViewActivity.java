@@ -19,11 +19,20 @@ import android.webkit.WebViewClient;
 import android.widget.Toast;
 
 import com.celdev.migstat.controller.Controller;
-import com.celdev.migstat.controller.DataStorage;
 import com.celdev.migstat.view.CustomAboutDialog;
 import com.celdev.migstat.view.ViewInterface;
 
-
+/*  This Acitivy contains a WebView that has a number of special funcations
+*       * it can only be used for answering the questions of the web page (only the specified url
+*           may be accessed)
+*       * when the user answers all questions the url that is called is intercepted and used to
+*           parse and save the average waiting time.
+*
+*   Depending on if the extra swedish boolean is present in the intent that creates this Activity
+*   the WebView will show the swedish or english web page
+*
+*   when the waiting time has been extracted the user will be moved to the ShowStatus Activity
+* */
 public class ApplicationTypeWebViewActivity extends AppCompatActivity implements ViewInterface {
 
     public static final String SWEDISH_PAGE_URL = "http://www.migrationsverket.se/Kontakta-oss/Tid-till-beslut.html";
@@ -42,16 +51,25 @@ public class ApplicationTypeWebViewActivity extends AppCompatActivity implements
         initWebView(swedishExtraInIntent());
     }
 
+    /* returns true if the intent contains the extra swedish boolean*/
     private boolean swedishExtraInIntent() {
         return getIntent() != null && (getIntent().getExtras() != null && getIntent().getExtras().getBoolean(MainActivity.WEBVIEWLANGUGAGE_INTENT, false));
     }
 
+    /*  Creates and shows a progress dialog)
+    * */
     private void initProgressDialog() {
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage(getString(R.string.loading_website));
         progressDialog.show();
     }
 
+    /*  initializes the WebView
+    *   enables javascript and sets the WebViewClient to the custom made
+    *   client.
+    *   loads the migrationsverkets url (swedish or engish depending on the boolean
+    *   passed as a parameter)
+    * */
     @SuppressLint("SetJavaScriptEnabled")
     private void initWebView(boolean swedish) {
         WebView webView = (WebView) findViewById(R.id.type_web_view);
@@ -61,6 +79,9 @@ public class ApplicationTypeWebViewActivity extends AppCompatActivity implements
         webView.loadUrl(url);
     }
 
+    /*  Dismisses the progress dialog (which is shown while the web page is loading)
+    *   and shows a dialog explaining what the user should do
+    * */
     private void dismissProgressDialogAndShowWhatToDoDialog() {
         boolean shouldShowWhatToDoDialog = progressDialog.isShowing();
         progressDialog.dismiss();
@@ -69,6 +90,10 @@ public class ApplicationTypeWebViewActivity extends AppCompatActivity implements
         }
     }
 
+    /*  This method is called when the check of the waiting time url have been done
+    *   if the waiting time is ok the user is moved to the ShowStatus-activity
+    *   otherwise an error dialog is shown
+    * */
     @Override
     public void modelChange(ModelChange modelChange) {
         progressDialog.dismiss();
@@ -83,6 +108,7 @@ public class ApplicationTypeWebViewActivity extends AppCompatActivity implements
         }
     }
 
+    /*  creates and shows a dialog which explains what the user should do*/
     private void showWhatToDoDialog() {
         new AlertDialog.Builder(this).setMessage(R.string.what_to_do_message).setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             @Override
@@ -93,10 +119,19 @@ public class ApplicationTypeWebViewActivity extends AppCompatActivity implements
     }
 
 
+    /*  This class extends the WebViewClient class and overrides a couple of methods which
+    *   enables the interception of the url that is called when the user finishes answering
+    *   all questions
+    *   also disables the ability for the user to use the webview to go to other web pages
+    * */
     private class CustomWebResourceResponseWebViewClient extends WebViewClient {
 
         private static final String FINAL_REQUEST_KEYWORD = "history";
 
+        /*  if the request is a send query (= when all questions have been answered)
+        *   then the url of the request will be saved and if the waiting time can be parsed
+        *   the user is moved to the ShowStatus activity
+        * */
         @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
         @Override
         public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
@@ -112,6 +147,7 @@ public class ApplicationTypeWebViewActivity extends AppCompatActivity implements
             return super.shouldInterceptRequest(view, request);
         }
 
+        /*  does the same as the method above but for low API*/
         @Override
         public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
             if (requestIsSendQuery("" + url)) {
@@ -155,6 +191,7 @@ public class ApplicationTypeWebViewActivity extends AppCompatActivity implements
         }
     }
 
+    /*  shows a dialog if the user tries to press an incorrect link or button */
     private void showWrongLinkDialog() {
         new AlertDialog.Builder(this).setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             @Override
@@ -177,6 +214,7 @@ public class ApplicationTypeWebViewActivity extends AppCompatActivity implements
         startActivity(intent);
     }
 
+    /* specifies which xml-file contains the menu-xml */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
@@ -185,6 +223,8 @@ public class ApplicationTypeWebViewActivity extends AppCompatActivity implements
     }
 
 
+    /*  this is called when the application is started or resume
+    *   makes sure the controller isn't null */
     @Override
     protected void onResume() {
         super.onResume();
@@ -192,6 +232,7 @@ public class ApplicationTypeWebViewActivity extends AppCompatActivity implements
     }
 
 
+    /*  this method is called when an item in the menu is pressed*/
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -203,6 +244,7 @@ public class ApplicationTypeWebViewActivity extends AppCompatActivity implements
         }
     }
 
+    /*  shows the about dialog */
     private void showAboutDialog() {
         new CustomAboutDialog(this).createAndShow();
     }

@@ -211,18 +211,18 @@
                 android:layout_below="@id/text_setup_waiting_time_type">
                 <Button
                     android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
                     android:id="@+id/waitingtime_launcher_eng"
-                    android:drawableStart="@drawable/ic_flag_of_the_united_kingdom"
-                    android:text="@string/english"
-                    android:drawableLeft="@drawable/ic_flag_of_the_united_kingdom" />
+                    android:drawableTop="@drawable/ic_flag_of_the_united_kingdom"
+                    android:text="@string/english" />
 
                 <Button
                     android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:scaleType="fitCenter"
-                    android:drawableLeft="@drawable/ic_flag_of_sweden"
-                    android:drawableStart="@drawable/ic_flag_of_sweden"
+                    android:layout_weight="1"
+                    android:drawableTop="@drawable/ic_flag_of_sweden"
                     android:id="@+id/waitingtime_launcher_swe"
                     android:text="@string/swedish" />
             </LinearLayout>

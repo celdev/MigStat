@@ -9,6 +9,10 @@ import android.widget.TextView;
 
 import com.celdev.migstat.R;
 
+/*  This is a Custom Dialog which lets the user select a number between 1 and 36
+*   when the number is selected the number will be passed to the NumberPickerDialogReturn passed as
+*   a parameter in the constructor of this class.
+* */
 public class CustomSetWaitingTimeDialog extends AlertDialog.Builder {
 
     public CustomSetWaitingTimeDialog(Context context, final NumberPickerDialogReturn numberPickerDialogReturn) {
@@ -39,6 +43,7 @@ public class CustomSetWaitingTimeDialog extends AlertDialog.Builder {
     }
 
 
+    /* creates and shows the dialog */
     public void createAndShow() {
         create().show();
     }

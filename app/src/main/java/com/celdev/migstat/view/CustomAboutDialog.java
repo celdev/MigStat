@@ -10,6 +10,11 @@ import android.widget.TextView;
 
 import com.celdev.migstat.R;
 
+/*  This is the About Dialog
+*   The about dialog is a long text inside a scroll view
+*   the email and web links in the text are made clickable with the
+*   Linkify.addLinks-method
+* */
 public class CustomAboutDialog extends AlertDialog.Builder {
 
     public CustomAboutDialog(Context context) {

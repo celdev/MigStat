@@ -5,16 +5,23 @@ import android.util.Log;
 
 import com.celdev.migstat.MainActivity;
 import com.celdev.migstat.controller.utils.DateUtils;
-import com.celdev.migstat.model.Application;
 import com.celdev.migstat.model.ApplicationDate;
 import com.celdev.migstat.model.ApplicationNumber;
-import com.celdev.migstat.model.ApplicationStatus;
 import com.celdev.migstat.model.ParserException;
 import com.celdev.migstat.model.StatusType;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
+
+
+/*  This class is responsible for extracting the status and application date of an application using
+*   the applications check/case number.
+*
+*   The extraction is done using an AsyncTask
+*   When the AsyncTask is created the object that will handle the result is
+*   passed as a parameter to the custom AsyncTask class constructor
+* */
 
 public class SimpleCaseStatusParser {
 
@@ -62,6 +69,15 @@ public class SimpleCaseStatusParser {
         return new ApplicationDate(DateUtils.dateStringToCalendar(elements.get(0).html().trim()).getTimeInMillis());
     }
 
+
+    /*  This AsyncTask will extract the status and application date of the application
+    *   with the application number (and application number type) passed as a parameter
+    *   in the execute-method.
+    *   if something can't be parsed an exception will be thrown and null will be returned.
+    *
+    *   the AsyncTaskResultReceiver passed as a parameter in the Worker constructor
+    *   will handle the object passed into onPostExecute
+    * */
     public static class Worker extends AsyncTask<ApplicationNumber, Void, StatusAndDate> {
 
         private AsyncTaskResultReceiver asyncTaskResultReceiver;
@@ -93,6 +109,11 @@ public class SimpleCaseStatusParser {
     }
 
 
+    /*  Wrapper class for wrapping the status type, application date
+    *   and the application number.
+    *
+    *   This will be used to update/create the Application-object
+    * */
     public static class StatusAndDate{
         private StatusType statusType;
         private ApplicationDate applicationDate;

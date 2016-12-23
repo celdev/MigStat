@@ -37,7 +37,7 @@ public class CustomInterstitialAd {
     *   and a new ad will be loaded into the interstitial ad
     * */
     private void initAd() {
-        interstitialAd.setAdUnitId(context.getString(R.string.ad_unit_id));
+        interstitialAd.setAdUnitId(context.getString(R.string.ad_unit_id_interstitial_ad));
         interstitialAd.setAdListener(new AdListener() {
             @Override
             public void onAdClosed() {
@@ -54,8 +54,6 @@ public class CustomInterstitialAd {
     * */
 	private void doAdRequest(){
         AdRequest adRequest = new AdRequest.Builder().
-                addTestDevice(AdRequest.DEVICE_ID_EMULATOR).
-                addTestDevice(context.getString(R.string.lgdevice)).
                 build();
         interstitialAd.loadAd(adRequest);
 	}

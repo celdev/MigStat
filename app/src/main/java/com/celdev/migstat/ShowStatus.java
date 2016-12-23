@@ -70,7 +70,6 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
     private ImageButton refreshButton;
     private TextView applicationDateTextView, progressBarText, estimatedMonthsText, applicationStatusText;
     private TextView daysSinceApplicationText, daysToDecisionText;
-    private AdView adView;
 
     private LinearLayout changeBgView;
     private ProgressBarUpdaterThread progressBarUpdaterThread;
@@ -118,8 +117,6 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
 
         //initializes the ads
         initAd();
-        //loads an ad into the banner ad
-        loadAd();
     }
 
 
@@ -268,7 +265,7 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
         controller.updateApplicationAndWaitingTime();
     }
 
-    /*  Fetches the view
+    /*  Fetches the view elements
     * */
     private void initViews() {
         root = (RelativeLayout) findViewById(R.id.activity_show_status);
@@ -449,6 +446,10 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
             }
         }
 
+        /*  calculates he progress (in percent)
+        *   by dividing the time waited with the estimated
+        *   average waiting time
+        * */
         private double calculateProgress() {
             long now = System.currentTimeMillis();
             long waited = now - startDateMS;
@@ -502,8 +503,7 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
         return true;
     }
 
-    /*  This method is called when a menu item is clicked
-    * */
+    /*  This method is called when a menu item is clicked */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -557,7 +557,8 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
         DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
         float dpWidth = (displayMetrics.widthPixels / displayMetrics.density) - 36;
         Log.d(MainActivity.LOG_KEY, "dp width is" + dpWidth);
-        this.adView = new AdView(this);
+        MobileAds.initialize(getApplicationContext(), "ca-app-pub-1707701136705466~8632139435");
+        AdView adView = new AdView(this);
         if (dpWidth < 320) {
             adView.setAdSize(new AdSize((int) dpWidth, 50));
         } else {
@@ -568,15 +569,10 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
         if (customInterstitialAd == null) {
             customInterstitialAd = new CustomInterstitialAd(controller, this);
         }
-        MobileAds.initialize(getApplicationContext(), "ca-app-pub-3940256099942544~3347511713");
-    }
-
-    /*  Load the ad to the banner
-    * */
-    private void loadAd() {
         AdRequest adRequest = new AdRequest.Builder().build();
         adView.loadAd(adRequest);
     }
+
 
     /*  Updates the GUI (including the ActionBar menu)
     *   after the waiting time have change
@@ -593,18 +589,17 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
         }
     }
 
-    /*  initializes the background changer-helper object
-    * */
+    /*  initializes the background changer-helper object */
     private void setChangeBackgroundMode() {
         new BackgroundChanger(controller,root, changeBgView, this);
     }
 
-    /*  creates and shows the about dialog.
-    * */
+    /*  creates and shows the about dialog. */
     private void showAboutDialog() {
         new CustomAboutDialog(this).createAndShow();
     }
 
+    /* removes the change background view elements */
     public void removeSetBG() {
         changeBgView.removeAllViewsInLayout();
     }

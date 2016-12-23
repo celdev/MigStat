@@ -1,10 +1,5 @@
 package com.celdev.migstat.model;
 
-import android.content.Context;
-import android.util.Log;
-
-import com.celdev.migstat.MainActivity;
-
 
 public class Application{
 

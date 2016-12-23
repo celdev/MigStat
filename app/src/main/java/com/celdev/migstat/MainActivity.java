@@ -4,10 +4,6 @@ import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
-import android.support.annotation.DrawableRes;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -21,21 +17,13 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.NumberPicker;
 import android.widget.RadioButton;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
-import com.celdev.migstat.controller.ApplicationStatusChecker;
 import com.celdev.migstat.controller.Controller;
-import com.celdev.migstat.controller.DataStorage;
-import com.celdev.migstat.controller.NoApplicationException;
-import com.celdev.migstat.controller.NoWaitingTimeException;
-import com.celdev.migstat.controller.WaitingTimeDataStoragePacket;
-import com.celdev.migstat.controller.parser.SimpleCaseStatusParser;
 import com.celdev.migstat.controller.utils.DateUtils;
 import com.celdev.migstat.model.Application;
 import com.celdev.migstat.model.ApplicationNumberType;
@@ -46,9 +34,17 @@ import com.celdev.migstat.view.CustomSetWaitingTimeDialog;
 import com.celdev.migstat.view.IntegerInputListener;
 import com.celdev.migstat.view.NumberPickerDialogReturn;
 import com.celdev.migstat.view.ViewInterface;
-import com.celdev.migstat.view.ViewUpdateReceiver;
 
 import java.util.Calendar;
+
+/*  This Activity contains the functionality for specifying which (migrationsverket)application
+*   this application will show the information about
+*
+*   The user can specify a number or specify the application date
+*   the user can then specify what kind of application this is
+*   (in the ApplicationTypeWebViewActivity)
+*   to get the estimated waiting time for similar applications.
+* */
 
 public class MainActivity extends AppCompatActivity implements ViewInterface {
 
@@ -77,6 +73,10 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        /* checks if this is the first time a new version of the app is launched
+        *  which requires the reset of the stored data in the application
+        *  shows a dialog if this is the case
+        * */
         if (controller.resetBecauseNewVersion()) {
             new AlertDialog.Builder(this).setMessage(R.string.reset_because_new_version).setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                 @Override
@@ -98,8 +98,9 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
         checkState();
     }
 
-
-
+    /*  sets up the OK-button functionality
+    *   and other view related to the "no application set"-state of this activity
+    * */
     private void setupApplicationOKButtonFunction() {
         checkStatusButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -122,6 +123,13 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
         findViewById(R.id.set_date_application_ok_text).setVisibility(View.INVISIBLE);
     }
 
+    /*  This method is called when the case check returns from checking if the
+    *   application number was correct
+    *
+    *   shows a Toast if the application number was wrong
+    *
+    *   sets the mode of the application depending on if the check was successful or not.
+    * */
     @Override
     public void modelChange(ModelChange modelChange) {
         progressDialog.dismiss();
@@ -161,20 +169,23 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
         }
     }
 
+    /* creates the progress dialog and sets it's text
+    * */
     private void initProgressDialog() {
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage(getString(R.string.loading_application_information));
     }
 
+    /* adds a TextChangeListener to the application number EditText which checks so the information
+     * entered is integers */
     private void initNumberField() {
         applicationNumberField = (EditText) findViewById(R.id.number_field);
         applicationNumberField.addTextChangedListener(new IntegerInputListener(this,applicationNumberField));
     }
 
+    /*  fetches the buttons from the view and init some of the listeners */
     private void initButtons() {
         checkStatusButton = (Button) findViewById(R.id.check_status_button);
-
-
         setDateButton = (Button) findViewById(R.id.set_application_date_button);
         setDateButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -183,14 +194,13 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
             }
         });
 
-
-
         afterSetDateButton = (Button) findViewById(R.id.after_set_date_button);
-
-
         initWaitingTimeButtons();
     }
 
+    /*  this method is called when the application is started or resumed
+    *   checks the state of the application
+    * */
     @Override
     protected void onResume() {
         super.onResume();
@@ -205,37 +215,23 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
         waitingTimeButtonSwe.setEnabled(false);
         waitingTimeButtonEng.setEnabled(false);
         customWaitingTimeButton.setEnabled(false);
-        /*Drawable grayEngFlag = null;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            grayEngFlag = getDrawable(R.drawable.ic_flag_of_the_united_kingdom);
-            Drawable graySweFlag = getDrawable(R.drawable.ic_flag_of_sweden);
-            if (grayEngFlag != null && graySweFlag != null) {
-                grayEngFlag.mutate();
-                graySweFlag.mutate();
-                grayEngFlag.setColorFilter(Color.GRAY, PorterDuff.Mode.ADD);
-                graySweFlag.setColorFilter(Color.GRAY, PorterDuff.Mode.ADD);
-                waitingTimeButtonEng.setImageDrawable(grayEngFlag);
-                waitingTimeButtonSwe.setImageDrawable(graySweFlag);
-
-            }
-        }*/
     }
 
     private void enableWaitingTimeButtons() {
         waitingTimeButtonSwe.setEnabled(true);
         waitingTimeButtonEng.setEnabled(true);
         customWaitingTimeButton.setEnabled(true);
-        /*if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            Drawable grayEngFlag = getDrawable(R.drawable.ic_flag_of_the_united_kingdom);
-            Drawable graySweFlag = getDrawable(R.drawable.ic_flag_of_sweden);
-            if (grayEngFlag != null && graySweFlag != null) {
-                waitingTimeButtonEng.setImageDrawable(grayEngFlag);
-                waitingTimeButtonSwe.setImageDrawable(graySweFlag);
-
-            }
-        }*/
     }
 
+    /*  initializes the waiting time buttons
+    *   english button:
+    *       starts the ApplicationTypeWebViewActivity
+    *   swedish button:
+    *       starts the ApplicationTypeWebViewActivity with an extra boolean in the intent
+    *   custom waiting time:
+    *       shows a dialog which enables the user to choose a custom waiting time (in months)
+    *       transfers the user to the ShowStatus-activity after the waiting time has been set
+    * */
     private void initWaitingTimeButtons() {
         waitingTimeButtonEng = (Button) findViewById(R.id.waitingtime_launcher_eng);
         waitingTimeButtonEng.setOnClickListener(new View.OnClickListener() {
@@ -277,12 +273,17 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
 
     }
 
+    /*  fetches the views the activity need to alter
+    * */
     private void initLayout() {
         replaceView = (ViewSwitcher) findViewById(R.id.replaceable_application_number_view);
         useNumberView = findViewById(R.id.use_number_view);
         useNoNumberView = findViewById(R.id.no_number_view);
     }
 
+    /*  Shows a date-picker dialog, if the user specifies a date the ok button will be enabled
+    *   and the date the user picked will be shown
+    * */
     private void showDatePickerDialog() {
         Calendar calendar = Calendar.getInstance();
         CustomDatePickerDialog customDatePickerDialog = new CustomDatePickerDialog(this, calendar, new DatePickerDialog.OnDateSetListener() {
@@ -298,16 +299,22 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
     }
 
 
+    /* fetches the radio buttons */
     private void initRadioButtons() {
         caseRadioButton = (RadioButton) findViewById(R.id.case_radio_button);
         checkRadioButton = (RadioButton) findViewById(R.id.check_radio_button);
     }
 
+    /* fetches the switch and sets it's listener */
     private void initSwitch() {
         useNumberSwitch = (Switch) findViewById(R.id.use_number_switch);
         useNumberSwitch.setOnCheckedChangeListener(switchListener);
     }
 
+    /*  the listener for the use application number switch
+    *   shows a dialog about how the application uses personal information
+    *   if the user switch the switch off
+    * */
     private CompoundButton.OnCheckedChangeListener switchListener = new CompoundButton.OnCheckedChangeListener() {
         @Override
         public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
@@ -318,6 +325,7 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
         }
     };
 
+    /*  Shows the correct view depending on if the use-application-number switch is on or off */
     private void setUseNumberStateEnabled(boolean enabled) {
         if (enabled && !replaceView.getCurrentView().equals(useNumberView)) {
             replaceView.showNext();
@@ -328,11 +336,13 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
         }
     }
 
+    /* removes the application object and resets the views */
     private void nullApplication() {
         application = null;
         resetViews();
     }
 
+    /* reset all the views */
     private void resetViews() {
         ((TextView) findViewById(R.id.set_application_date_text)).setText(R.string.set_your_application_date);
         applicationNumberField.setText("");
@@ -348,6 +358,9 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
         setupApplicationOKButtonFunction();
     }
 
+    /*  locks the "enter application number"-part of the view
+    *   after a successful application number check
+    * */
     private void lockApplicationAfterDownload() {
         useNumberSwitch.setEnabled(false);
         checkRadioButton.setEnabled(false);
@@ -355,11 +368,16 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
         applicationNumberField.setEnabled(false);
     }
 
+    /*  locks the set-date button after the user presses ok
+    * */
     private void lockApplicationAfterSetDate() {
         useNumberSwitch.setEnabled(false);
         setDateButton.setEnabled(false);
     }
 
+    /*  returns the ApplicationNumberType used (depending on which
+    *   radio button is pressed
+    * */
     private ApplicationNumberType getApplicationNumberType() {
         if (caseRadioButton.isChecked()) {
             return ApplicationNumberType.CASE_NUMBER;
@@ -367,6 +385,10 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
         return ApplicationNumberType.CHECK_NUMBER;
     }
 
+    /*  shows a dialog which explains how this application
+    *   uses the personal information the user may provide if they choose
+    *   to use their applications number.
+    * */
     private void showNoNumberDialog() {
         AlertDialog alertDialog = new AlertDialog.Builder(this).
                 setMessage(R.string.no_number_info_dialog).
@@ -379,15 +401,21 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
         alertDialog.show();
     }
 
+    /*  Sets the icon of the EditText-view depending on if the
+    *   application number was correct
+    * */
     private void setOkIconAfterStatusCheck(boolean success) {
         if (success) {
-            applicationNumberField.setCompoundDrawablesWithIntrinsicBounds(0,0,R.drawable.ic_ok,0);
+            applicationNumberField.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_ok, 0);
             setLockMode(ViewLockMode.APPLICATION_LOCK);
         } else {
-            applicationNumberField.setCompoundDrawablesWithIntrinsicBounds(0,0,android.R.drawable.ic_delete,0);
+            applicationNumberField.setCompoundDrawablesWithIntrinsicBounds(0, 0, android.R.drawable.ic_delete, 0);
         }
     }
 
+    /*  Sets the ok button-mode to cancel mode
+    *   so that the user can reset the provided application information
+    * */
     private void setOKButtonCancelMode() {
         checkStatusButton.setText(R.string.cancel);
         afterSetDateButton.setText(R.string.cancel);
@@ -411,6 +439,8 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
         });
     }
 
+    /*  Specifies the file that contains the menu-xml
+    * */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
@@ -419,6 +449,8 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
     }
 
 
+    /*  This method is called when an item in the menu is pressed
+    * */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -430,10 +462,14 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
         }
     }
 
+    /*  creates and shows the about dialog */
     private void showAboutDialog() {
         new CustomAboutDialog(this).createAndShow();
     }
 
+    /*  Preforms a check of the entered application number
+    *   locks the check button and shows a progress dialog
+    * */
     private void doStatusCheck() {
         checkStatusButton.setEnabled(false);
         application = null;
@@ -446,6 +482,11 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
 
 
 
+    /*  overrides the functionality of the back button to make sure that the
+    *   user can't "back into" a part of the application which shouldn't be
+    *   accessible (i.e. backing to the ShowStatus-activity after reseting
+    *   the application)
+    * */
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
@@ -458,6 +499,8 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
     }
 
 
+    /*  Sets the views and states in the activity to the correct mode
+    * */
     private void setLockMode(ViewLockMode viewLockMode) {
         switch (viewLockMode) {
             case APPLICATION_LOCK:
@@ -478,6 +521,11 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
     }
 
 
+    /*  enum used to represent the different modes this activity can have:
+    *       APPLICATION_LOCK    the application information is set (waiting time button is unlocked)
+    *       WAITING_TIME_LOCK   the application information isn't set (waiting time button locked)
+    *       UNLOCK_APPLICATION  the application information was reset
+    * */
     private enum ViewLockMode {
         APPLICATION_LOCK,
         WAITING_TIME_LOCK,

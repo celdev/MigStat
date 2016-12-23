@@ -1,7 +1,9 @@
 package com.celdev.migstat.view;
 
-import com.celdev.migstat.model.Application;
 
+/*  This interface provides a way for the controller to
+*   inform the view of an update and specify what that update was
+* */
 public interface ViewInterface {
 
     enum ModelChange {

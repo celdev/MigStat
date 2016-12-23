@@ -4,6 +4,8 @@ import android.app.DatePickerDialog;
 import android.content.Context;
 import java.util.Calendar;
 
+/*  Creates a DatePickerDialog with the max date = todays date.
+* */
 public class CustomDatePickerDialog extends DatePickerDialog{
 
     public CustomDatePickerDialog(Context context, Calendar calendar, OnDateSetListener onDateSetListener) {

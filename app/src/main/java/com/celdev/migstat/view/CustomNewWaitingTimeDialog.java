@@ -7,6 +7,9 @@ import android.content.DialogInterface;
 import com.celdev.migstat.R;
 import com.celdev.migstat.model.Application;
 
+/*  Creates a dialog informing the user that the average waiting time
+*   in the migrationsverkets website for similar applications have been updated
+* */
 public class CustomNewWaitingTimeDialog extends AlertDialog.Builder {
 
     public CustomNewWaitingTimeDialog(Context context) {
