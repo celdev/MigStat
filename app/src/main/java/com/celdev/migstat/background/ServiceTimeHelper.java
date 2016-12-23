@@ -37,7 +37,6 @@ class ServiceTimeHelper {
     }
 
     /*  returns true if the current hour is later or equal to 8 and less or equal to 18
-    *
     *   returns true if hour is between 8:00 and 18.59 swedish time.
     * */
     private static boolean isWorkingHours(Calendar calendar) {
