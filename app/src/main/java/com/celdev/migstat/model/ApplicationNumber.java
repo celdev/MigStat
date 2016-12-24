@@ -1,5 +1,11 @@
 package com.celdev.migstat.model;
 
+/*  This class contains the application number and the application number type
+*
+*
+*   It is possible that the number should be stored as a String since it
+*   may start with a zero, however, so far I haven't seen any numbers starting with zero
+* */
 public class ApplicationNumber {
 
     private final int applicationNumber;

@@ -4,7 +4,19 @@ import com.celdev.migstat.controller.utils.DateUtils;
 
 import java.util.Comparator;
 
-public class WaitingTime implements WaitingTimeInterface {
+/*  This class contains the waiting time.
+*
+*   There are two different types of waiting time
+*       custom              the user sets the waiting time themself
+*       migrationsverket    the application uses the waiting time
+*                           from the migrationsverket website
+*
+*   the migrationsverket waiting time are usually 2 months (i.e. 13-15 months)
+*   the custom is only 1 month
+*
+*   the migrationsverket waiting time is extractable from the url stored in the query variable
+* */
+public class WaitingTime {
 
 
     public enum WaitingTimeMode{
@@ -38,10 +50,12 @@ public class WaitingTime implements WaitingTimeInterface {
         this.useCustomMonths = true;
     }
 
+    //returns true if the waiting time query is set
     public boolean hasQuery() {
         return query != null && !query.isEmpty();
     }
 
+    //returns true if the custom months value isn't set to zero
     public boolean hasCustomWaitingTime() {
         return customMonths != 0;
     }
@@ -52,13 +66,18 @@ public class WaitingTime implements WaitingTimeInterface {
         return useCustomMonths || highMonth == lowMonth;
     }
 
-
+    //sets the waiting time mode to custom months and the custom months value and
+    //returns this
     public WaitingTime setUseCustomMonthsMode(int customMonths) {
         this.customMonths = customMonths;
         this.useCustomMonths = true;
         return this;
     }
 
+    //sets the waiting time mode depending on the
+    //the waitingtimemode passed as a parameter
+    //if WaitingTimeMode.MIGRATIONSVERKET is passed the useCustomMonths will be
+    //set to false
     public void setWaitingTimeMode(WaitingTimeMode waitingTimeMode) {
         useCustomMonths = !waitingTimeMode.equals(WaitingTimeMode.MIGRATIONSVERKET);
     }
@@ -71,14 +90,6 @@ public class WaitingTime implements WaitingTimeInterface {
         return customMonths;
     }
 
-    public void disableCustomMonthsMode() throws IllegalWaitingTimeStateException {
-        if (lowMonth == -1 && highMonth == -1) {
-            throw new IllegalWaitingTimeStateException();
-        }
-        this.useCustomMonths = false;
-    }
-
-
     public int getLowMonth() {
         return lowMonth;
     }
@@ -87,6 +98,10 @@ public class WaitingTime implements WaitingTimeInterface {
         return highMonth;
     }
 
+    /*  returns the average months
+    *   custom months if the custom months mode is set
+    *   otherwise the average value of the high and low value
+    * */
     public double getAverage() {
         if (useCustomMonths) {
             return customMonths;
@@ -98,6 +113,9 @@ public class WaitingTime implements WaitingTimeInterface {
         return updatedAtDate;
     }
 
+    /*  Comparator for the update-at value in the waiting time
+    *   compares the dates of the waiting time to determine which is the newest
+    * */
     public static Comparator<WaitingTime> WaitingTimeUpdatedDateComparator = new Comparator<WaitingTime>() {
         @Override
         public int compare(WaitingTime waitingTime, WaitingTime t1) {

@@ -1,5 +1,10 @@
 package com.celdev.migstat.model;
 
+/*
+*   The migrationsverket uses the number 1 to represent a case number
+*   and number 2 to represent a check number in the url
+*
+* */
 public enum ApplicationNumberType {
 
     CASE_NUMBER(1),

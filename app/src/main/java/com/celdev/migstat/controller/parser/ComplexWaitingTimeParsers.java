@@ -2,7 +2,6 @@ package com.celdev.migstat.controller.parser;
 
 import com.celdev.migstat.controller.AsyncCallback;
 import com.celdev.migstat.model.MultipleWaitingTimeWrapper;
-import com.celdev.migstat.model.ParserException;
 import com.celdev.migstat.model.query.Query;
 
 import org.jsoup.nodes.Document;

@@ -1,10 +1,15 @@
 package com.celdev.migstat.model;
 
-import android.content.Context;
-import android.content.res.Resources;
-
-import com.celdev.migstat.R;
-
+/*  Wraps the StatusType enum
+*
+*   contains methods for translating an integer to a StatusType
+*   during parsing the status will be extracted by determining which
+*   li-element in a list have the active class
+*   which is a zero based index with
+*       0 = received
+*       1 = waiting
+*       2 = finished
+* */
 public class ApplicationStatus {
 
     private int status;

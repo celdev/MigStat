@@ -1,5 +1,7 @@
 package com.celdev.migstat.model.query;
 
+
+/*  This is used by the parsers to determine if the query website is in english or swedish */
 public class Query {
 
     public enum SwedishOrEnglishQuery{

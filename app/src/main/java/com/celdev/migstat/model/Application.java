@@ -1,6 +1,14 @@
 package com.celdev.migstat.model;
 
-
+/*  Contains all the application information
+*
+*   There are two different kinds of applications
+*       1. An application with an application number
+*       2. An application without an application number
+*
+*   both have an application date
+*
+* */
 public class Application{
 
     private ApplicationStatus applicationStatus;
@@ -10,6 +18,7 @@ public class Application{
 
     private boolean hasApplicationNumber;
 
+    //constructor for the Application with an application number
     public Application(StatusType status, long applicationDate, Integer applicationNumber, ApplicationNumberType applicationNumberType) {
         this.applicationStatus = new ApplicationStatus(status.getNumber());
         this.applicationDate = new ApplicationDate(applicationDate);
@@ -17,11 +26,13 @@ public class Application{
         hasApplicationNumber = true;
     }
 
+    //constructor for the Application without an application number
     public Application(long applicationDate) {
         this.applicationDate = new ApplicationDate(applicationDate);
         hasApplicationNumber = false;
     }
 
+    //returns true if the application number is set
     public boolean isHasApplicationNumber() {
         return hasApplicationNumber;
     }
@@ -61,6 +72,8 @@ public class Application{
         return applicationDate.getApplicationDate();
     }
 
+    //returns the application status if it has an application status
+    //otherwise throws an exception
     public ApplicationStatus getApplicationStatus() throws NoApplicationNumberException {
         if (applicationStatus == null) {
             throw new NoApplicationNumberException();
@@ -68,6 +81,8 @@ public class Application{
         return applicationStatus;
     }
 
+    //returns the application number if the application number
+    //has been set, otherwise throws an exception
     public ApplicationNumber getApplicationNumber() throws NoApplicationNumberException {
         if (applicationNumber == null) {
             throw new NoApplicationNumberException();
@@ -75,6 +90,7 @@ public class Application{
         return applicationNumber;
     }
 
+    //sets the statustype and returns true if the status type = Finished
     public boolean newStatusTypeReturnTrueIfGetDecision(StatusType statusType) {
         if (hasApplicationNumber) {
             try {
@@ -88,6 +104,13 @@ public class Application{
         return false;
     }
 
+    /*  Currently not used
+    *
+    *   allows the application to show the update in waiting time
+    *   currently a dialog that informs the user that the waiting time has been updated is shown
+    *   using this it's possible to display the change in months, or not show the dialog
+    *   if the months are the same
+    * */
     public class OldAndNewWaitingTimeWrapper {
         private WaitingTime oldWaitingTime;
         private WaitingTime newWaitingTime;

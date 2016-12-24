@@ -3,14 +3,21 @@ package com.celdev.migstat.controller;
 import android.util.Log;
 
 import com.celdev.migstat.MainActivity;
-import com.celdev.migstat.controller.parser.AsyncTaskResultReceiver;
 import com.celdev.migstat.controller.parser.ComplexWaitingTimeParsers;
 import com.celdev.migstat.controller.parser.MonthsWaitingTimeParser;
 import com.celdev.migstat.controller.parser.WaitingTimeParser;
-import com.celdev.migstat.model.MultipleWaitingTimeWrapper;
-import com.celdev.migstat.model.ParserException;
-import com.celdev.migstat.model.WaitingTime;
 
+/*  This class contains the methods for
+*   determining which parser should be used
+*
+*   there are two different types of parsers
+*   complex and not complex (simple)
+*   the simple parsers parse waiting times that are in
+*   the form "low month-high month" i.e. "13-15 months"
+*
+*   The complex parsers parse waiting times that have multiple waiting times
+*   or in other ways isn't parsable by the simple parser.
+* */
 public class WebViewResponseParser {
 
     public static final String VISIT_SWEDEN = "q0:4";
@@ -27,6 +34,10 @@ public class WebViewResponseParser {
 
     private static final String NOT_COMPLEX = "not_complex";
 
+    /*  Creates a parser and execute that parser with the query (url) passed
+    *   as a parameter and uses the AsyncCallback passed as a parameter
+    *   to handle the result of the parser
+    * */
     public WebViewResponseParser(String query, AsyncCallback asyncCallback) {
         String parserType = returnComplexString(query);
         if (query.trim().isEmpty()) {
@@ -48,6 +59,9 @@ public class WebViewResponseParser {
         }
     }
 
+    /*  returns "not_complex" if the waiting time parser to be used is simple
+    *   otherwise returns the complex part of the query
+    * */
     private String returnComplexString(String query) {
         for (String s : COMPLEX_QUERIES) {
             if (query.contains(s)) {

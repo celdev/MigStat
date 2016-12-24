@@ -1,5 +1,6 @@
 package com.celdev.migstat.model;
 
+/*  Exception that may be thrown during parsing of the website */
 public class ParserException extends Exception {
     public ParserException() {
     }

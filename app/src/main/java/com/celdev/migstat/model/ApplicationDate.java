@@ -1,5 +1,7 @@
 package com.celdev.migstat.model;
 
+/*  Stores the application date as a long (time in ms since epoch
+* */
 public class ApplicationDate {
 
     private long applicationDate;

@@ -8,10 +8,13 @@ import com.celdev.migstat.MainActivity;
 
 import com.celdev.migstat.model.Application;
 import com.celdev.migstat.model.ApplicationNumberType;
-import com.celdev.migstat.model.NoApplicationNumberException;
 import com.celdev.migstat.model.StatusType;
 import com.celdev.migstat.model.WaitingTime;
 
+/*  This class is responsible for saving and loading data
+*   it defines a large amount of constants that will be used as keys by the
+*   SharedPreference
+* */
 public class DataStorage {
 
     private final static String APPLICATION_NUMBER_KEY = "APPLICATION_NUMBER";
@@ -40,7 +43,8 @@ public class DataStorage {
 
     private static final long THEME_ENABLE_TIME = 259200000L; //3 days
 
-
+    /*  Uses the Singleton pattern
+    * */
     private static DataStorage dataStorage;
 
     static DataStorage getInstance(){
@@ -53,33 +57,19 @@ public class DataStorage {
     private DataStorage() {
     }
 
+    //return the users background-index choice
     int getBackgroundIndex(Context context) {
         SharedPreferences preferences = getSharedPreference(context);
         return preferences.getInt(APP_BACKGROUND_INDEX, 0);
     }
 
+    //saves the background index the user has chosen
     void saveBackgroundIndex(Context context, int index) {
         SharedPreferences preferences = getSharedPreference(context);
         preferences.edit().putInt(APP_BACKGROUND_INDEX, index).apply();
     }
 
-
-    boolean saveWaitingTimeDataStoragePacket(Context context, WaitingTime waitingTime) {
-        if (waitingTime == null) {
-            return false;
-        }
-        SharedPreferences preferences = getSharedPreference(context);
-        try {
-            preferences.edit().
-                    putBoolean(WAITING_TIME_TYPE_QUERY_MODE, waitingTime.isUseCustomMonths()).
-                    putInt(WAITING_TIME_QUERY_CUSTOM_MONTHS, waitingTime.getCustomMonths()).
-                    putString(WAITING_TIME_TYPE_QUERY, waitingTime.getQuery()).apply();
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
+    //stores the waiting time information, returns true if successful
     boolean saveWaitingTime(Context context, WaitingTime waitingTime) {
         SharedPreferences preferences = getSharedPreference(context);
         if (waitingTime == null) {
@@ -99,6 +89,7 @@ public class DataStorage {
         }
     }
 
+    //loads and returns the waiting time, throws an exception if the information is invalid
     WaitingTime loadWaitingTime(Context context) throws NoWaitingTimeException{
         SharedPreferences preferences = getSharedPreference(context);
         String waitingTimeQuery = preferences.getString(WAITING_TIME_TYPE_QUERY, "");
@@ -123,10 +114,16 @@ public class DataStorage {
         return new WaitingTime(lowMonth, highMonth, updatedAt, waitingTimeQuery, useCustomMode, customMonths);
     }
 
+    /*  returns true if invalid
+    *   it's invalid if the query is empty and the waiting time mode
+    *   is query mode (use migrationsverket waiting time)
+    *   or if the custom months value is zero and the waiting time mode is use custom months
+    * */
     private boolean isInvalidWaitingTime(String query, int customMonth, boolean useCustomMonth) {
         return (query.isEmpty() && !useCustomMonth) || (customMonth == 0 && useCustomMonth);
     }
 
+    //saves the application
     boolean saveApplication(Context context, Application application) {
         SharedPreferences preferences = getSharedPreference(context);
         if (application == null) {
@@ -151,6 +148,7 @@ public class DataStorage {
         }
     }
 
+    //loads the application
     Application loadApplication(Context context) throws NoApplicationException{
         SharedPreferences preferences = getSharedPreference(context);
         try {
@@ -179,11 +177,12 @@ public class DataStorage {
         throw new NoApplicationException();
     }
 
-
+    //returns the sharedPreference for this application
     private SharedPreferences getSharedPreference(Context context) {
         return context.getSharedPreferences(MainActivity.APPLICATION_KEY, Context.MODE_PRIVATE);
     }
 
+    //returns true if this is the first time the application is run on a new version
     private boolean firstTimeNewVersion(Context context) {
         boolean returnValue = true;
         try {
@@ -198,6 +197,8 @@ public class DataStorage {
         return returnValue;
     }
 
+    //reset all data if the version (of the data storage) has been increased
+    //returns true if the data is reset
     boolean checkVersionResetIfNeeded(Context context) {
         boolean reset = firstTimeNewVersion(context);
         if (reset) {
@@ -207,17 +208,20 @@ public class DataStorage {
         return reset;
     }
 
+    //saves the current version
     private void saveVersion(Context context) {
         Log.d(MainActivity.LOG_KEY, "Saving app version " + APP_VERSION);
         getSharedPreference(context).edit().putLong(VERSION_KEY, APP_VERSION).apply();
     }
 
+    //delete all data and save the version
     void deleteAllData(Context context) {
         Log.d(MainActivity.LOG_KEY, "Deleting all data");
         getSharedPreference(context).edit().clear().apply();
         saveVersion(context);
     }
 
+    //deletes the waiting time information
     void deleteWaitingTime(Context context) {
         SharedPreferences preferences = getSharedPreference(context);
         preferences.edit().
@@ -229,6 +233,7 @@ public class DataStorage {
                 remove(WAITING_TIME_TYPE_QUERY).apply();
     }
 
+    //save the time when themes (change background) were enabled
     void saveEnabledThemes(Context context) {
         SharedPreferences preferences = getSharedPreference(context);
         preferences.edit().
@@ -238,6 +243,7 @@ public class DataStorage {
         Log.d(MainActivity.LOG_KEY, "Finished saving Enabled ad");
     }
 
+    //returns true if the change background mode is enabled
     boolean isThemeEnabled(Context context) {
         SharedPreferences preferences = getSharedPreference(context);
         boolean themesIsEnabled = preferences.getBoolean(APP_ENABLE_THEMES, false);

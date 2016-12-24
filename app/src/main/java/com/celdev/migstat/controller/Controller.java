@@ -1,6 +1,5 @@
 package com.celdev.migstat.controller;
 
-import android.app.Activity;
 import android.content.Context;
 import android.support.annotation.DrawableRes;
 import android.util.Log;
@@ -12,6 +11,12 @@ import com.celdev.migstat.model.ApplicationNumberType;
 import com.celdev.migstat.model.WaitingTime;
 import com.celdev.migstat.view.ViewInterface;
 
+
+/*  This class contains the functionality for communication between
+*   the Activity and the data storage,
+*   the Activity and the Model and
+*   the Activity and the AsyncTask (parsers)
+* */
 public class Controller implements DataStorageInterface {
 
 
@@ -31,6 +36,14 @@ public class Controller implements DataStorageInterface {
         HAVE_BOTH;
     }
 
+    /*  returns the application state
+    *   if the application or waiting time is null it tries to load those from the
+    *   DataStorage
+    *   if the application can't be loaded NO_APPLICATION is returned
+    *   if the waiting time can't be loaded NO_WAITING_TIME is returned
+    *   else
+    *   HAVE_BOTH is returned
+    * */
     public ApplicationState getApplicationState() {
         try {
             if (application == null) {
@@ -48,17 +61,17 @@ public class Controller implements DataStorageInterface {
         return ApplicationState.HAVE_BOTH;
     }
 
-
+    //sets which ViewInterface should received updates when the AsyncTask finishes
     public Controller(Context context, ViewInterface viewInterface) {
         this.context = context;
         this.viewInterface = viewInterface;
     }
 
-
     public void setApplication(Application application) {
         Controller.application = application;
     }
 
+    //if the application has an application number, the status of the application is updated
     public void updateApplication() {
         if (application.isHasApplicationNumber()) {
             new ApplicationStatusChecker(applicationAsyncCallback).checkApplication(application);
@@ -67,18 +80,22 @@ public class Controller implements DataStorageInterface {
         }
     }
 
+    //returns true if the application is using custom months
     public boolean isUsingCustomWaitingTime() {
         return waitingTime.isUseCustomMonths();
     }
 
+    //returns true if the waiting time query (the migrationsverket url) is set
     public boolean hasWaitingTimeQuery() {
         return application.getWaitingTime().hasQuery();
     }
 
+    //returns true if a custom months value has been set
     public boolean hasCustomWaitingTime() {
         return waitingTime.hasCustomWaitingTime();
     }
 
+    //if the waiting time isn't null and has a waiting time query the waiting time will be updated
     public void updateWaitingTime() {
         if (waitingTime != null && waitingTime.hasQuery()) {
             new WebViewResponseParser(waitingTime.getQuery(), waitingTimeAsyncCallback);
@@ -87,17 +104,19 @@ public class Controller implements DataStorageInterface {
         }
     }
 
+    //updates both the waiting time and application
     public void updateApplicationAndWaitingTime() {
         updateApplication();
         updateWaitingTime();
     }
 
-
+    //passes the ModelChange-object to the ViewInterface
     private void updateView(ViewInterface.ModelChange modelChange) {
         Log.d(MainActivity.LOG_KEY, "Updating view " + viewInterface.getClass().getName() + " with model change " + modelChange.name());
         viewInterface.modelChange(modelChange);
     }
 
+    //returns the application is it isn't null, throws an exception if it is null
     @Override
     public Application getApplication() throws IncorrectStateException {
         if (application == null) {
@@ -106,7 +125,11 @@ public class Controller implements DataStorageInterface {
         return application;
     }
 
-
+    /*  This implementation of the AsyncCallback will handle the result from the
+    *   check application Async Tasks
+    *
+    *   Depending on the result different ModelChange-object will be passed to the view
+    * */
     private AsyncCallback applicationAsyncCallback = new AsyncCallback() {
         @Override
         public void receiveAsyncResult(Object result) {
@@ -137,6 +160,12 @@ public class Controller implements DataStorageInterface {
         }
     };
 
+
+    /*  This implementation of the AsyncCallback will handle the result from the
+    *   waiting time (parsers) Async Tasks
+    *
+    *   Depending on the result different ModelChange-object will be passed to the view
+    * */
     private AsyncCallback waitingTimeAsyncCallback = new AsyncCallback() {
         @Override
         public void receiveAsyncResult(Object result) {
@@ -167,6 +196,9 @@ public class Controller implements DataStorageInterface {
         }
     };
 
+    /*  this implementation of the AsyncCallback interface will handle the result
+    *   from the "check if the application is valid"-part of the application
+    * */
     private AsyncCallback checkIfApplicationIsValidCallback = new AsyncCallback() {
         @Override
         public void receiveAsyncResult(Object result) {
@@ -188,6 +220,12 @@ public class Controller implements DataStorageInterface {
         }
     };
 
+
+    /*  This implementation of the AsyncCallback will handle the result from the
+    *   first check of the waiting time (in the webview)
+    *
+    *   Depending on the result different ModelChange-object will be passed to the view
+    * */
     private AsyncCallback checkWaitingTimeQueryCallback = new AsyncCallback() {
         @Override
         public void receiveAsyncResult(Object result) {
@@ -202,38 +240,47 @@ public class Controller implements DataStorageInterface {
         }
     };
 
+    //checks the application number and returns an Application object if it is valid (returns to the
+    //checkIfApplicationIsValidCallback-object)
     public void checkApplicationNumberReturnApplication(int applicationNumber, ApplicationNumberType applicationNumberType) {
         new ApplicationStatusChecker(checkIfApplicationIsValidCallback).checkApplication(applicationNumber, applicationNumberType);
     }
 
+    //checks the waiting time query (used in the web view)
     public void handleWaitingTimeQuery(String query) {
         new WebViewResponseParser(query, checkWaitingTimeQueryCallback);
     }
 
+    //save all data (application and waiting time)
     @Override
     public boolean saveAll() {
         DataStorage dataStorage = DataStorage.getInstance();
         return !(application == null || waitingTime == null) && dataStorage.saveApplication(context, application) && dataStorage.saveWaitingTime(context, waitingTime);
     }
 
+    //saves the application
     public boolean saveApplication(Application application) {
         return DataStorage.getInstance().saveApplication(context, application);
     }
 
+    //sets the waiting time mode and saves the mode in the data storage
     public void setWaitingTimeMode(boolean useCustom) {
         application.getWaitingTime().setWaitingTimeMode(useCustom ? WaitingTime.WaitingTimeMode.CUSTOM : WaitingTime.WaitingTimeMode.MIGRATIONSVERKET);
         saveWaitingTime(waitingTime);
     }
 
+    //sets the mode to custom months (and it's value) and saves the waiting time in the data storage
     public void setAndUseCustomWaitingTime(int months) {
         application.getWaitingTime().setUseCustomMonthsMode(months);
         saveWaitingTime(waitingTime);
     }
 
+    //saves the waiting time
     public boolean saveWaitingTime(WaitingTime waitingTime) {
         return DataStorage.getInstance().saveWaitingTime(context, waitingTime);
     }
 
+    //returns the waiting time if it isn't null, otherwise throws an exception
     @Override
     public WaitingTime getWaitingTime() throws IncorrectStateException {
         if (waitingTime == null) {
@@ -242,6 +289,7 @@ public class Controller implements DataStorageInterface {
         return waitingTime;
     }
 
+    //loads the application and waiting time from the data storage
     @Override
     public void loadAll() throws DataStorageLoadException {
         DataStorage dataStorage = DataStorage.getInstance();
@@ -250,22 +298,26 @@ public class Controller implements DataStorageInterface {
         application.setWaitingTime(waitingTime);
     }
 
+    //saves the background index
     @Override
     public void saveBackground(@DrawableRes int background) {
         DataStorage.getInstance().saveBackgroundIndex(context, background);
     }
 
+    //loads the background index
     @Override
     public int loadBackground() {
         return DataStorage.getInstance().getBackgroundIndex(context);
     }
 
+    //deletes the waiting time
     @Override
     public void deleteWaitingTime() {
         DataStorage.getInstance().deleteWaitingTime(context);
         waitingTime = null;
     }
 
+    //deletes all data
     @Override
     public void deleteAll() {
         DataStorage.getInstance().deleteAllData(context);
@@ -273,17 +325,18 @@ public class Controller implements DataStorageInterface {
         waitingTime = null;
     }
 
-
-
+    //resets the data and returns true if
+    //this is the first time the application is run on a new version
     public boolean resetBecauseNewVersion() {
         return DataStorage.getInstance().checkVersionResetIfNeeded(context);
     }
 
-
+    //save the change background enable state
     public void saveEnableThemes() {
         DataStorage.getInstance().saveEnabledThemes(context);
     }
 
+    //returns true if the change background state is enabled
     public boolean themesIsEnabled() {
         return DataStorage.getInstance().isThemeEnabled(context);
     }
