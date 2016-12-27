@@ -6,6 +6,10 @@ import com.celdev.migstat.model.WaitingTime;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
+/*  This waiting time parser works on the simple waiting times
+*   which will produce a waiting time containing two months (i.e. 13-15 months)
+*   and also contains an "updated at" value
+* */
 public class SimpleWaitingTimeParser {
 
     public static final String DIV_CLASS_CONTENT = ".sv-script-portlet.sv-portlet";
@@ -17,11 +21,17 @@ public class SimpleWaitingTimeParser {
     public static final String SWEDISH_AFTER_MONTHS = "månader.";
     public static final String ENGLISH_AFTER_MONTHS = "months.";
 
-
+    /*  The waiting time url is english so use the english words to extract the values
+    *   returns a waiting time object if successful
+    * */
     public static WaitingTime parseSimpleEnglish(String query, Document document) throws ParserException{
         return parseDocumentGetDatesPart(query, document, ENGLISH_BEFORE_MONTHS, ENGLISH_BEFORE_UPDATED_AT, ENGLISH_AFTER_MONTHS);
     }
 
+
+    /*  The waiting time url is swedish so use the swedish words to extract the values
+    *   returns a waiting time object if successful
+    * */
     public static WaitingTime parseSimpleSwedish(String query, Document document) throws ParserException{
         return parseDocumentGetDatesPart(query, document, SWEDISH_BEFORE_MONTHS, SWEDISH_BEFORE_UPDATED_AT, SWEDISH_AFTER_MONTHS);
     }
@@ -60,6 +70,9 @@ public class SimpleWaitingTimeParser {
         }
     }
 
+    /*  returns an integer array containing the low month and high month of the string passed in
+    *   (i.e.) "13-15" becomes [13,15]
+    * */
     public static int[] extractMonths(String monthsLine) throws NumberFormatException, ArrayIndexOutOfBoundsException{
         String[] monthsSTR = monthsLine.split("-");
         return new int[]{Integer.valueOf(monthsSTR[0]), Integer.valueOf(monthsSTR[1])};

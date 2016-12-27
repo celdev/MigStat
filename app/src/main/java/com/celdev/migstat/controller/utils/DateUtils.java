@@ -88,13 +88,14 @@ public class DateUtils {
         return 1 == compareDateStrings(first, second);
     }
 
+    //returns the yyyy-MM-dd date format for a time in ms since epoch
     public static String msToDateString(Long ms) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(ms);
         return new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(calendar.getTime());
     }
 
-
+    //returns the ms since epoch of the parameter start + parameter avgMonths times ms in a month
     public static long addAverageMonthsToDate(long start, double avgMonths) {
         long avgMonthsInMS = (long)(avgMonths * MS_IN_A_MONTH);
         return start + avgMonthsInMS;

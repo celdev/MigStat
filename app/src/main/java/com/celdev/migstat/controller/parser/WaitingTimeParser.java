@@ -10,6 +10,10 @@ import org.jsoup.nodes.Document;
 
 import java.io.IOException;
 
+/*  Abstract class that the waiting time parsers will extend
+*   contains methods needed for the sub classes to only need to
+*   implement the doInBackground-method of the AsyncTask class
+* */
 public abstract class WaitingTimeParser extends AsyncTask<String, Void, Object> {
 
     /*  The id the swedish response uses */

@@ -9,12 +9,22 @@ import org.jsoup.nodes.Document;
 
 import java.io.IOException;
 
+/*  This class extends WaitingTimeParser and defines the
+*   doInBackground-method which is executed when passing
+*   the waiting time query url into the execute method of the AsyncTask-class
+* */
 public class MonthsWaitingTimeParser extends WaitingTimeParser{
 
     public MonthsWaitingTimeParser(AsyncCallback asyncCallback) {
         super(asyncCallback);
     }
 
+    /*  Gets the document for the url and checks if it's the swedish or english url
+    *   and uses the different parseSimple-methods of the SimpleWaitingTimeParser-class
+    *   depending on the language
+    *
+    *   if successful it will return a WaitingTime-object, otherwise it will return null
+    * */
     @Override
     protected Object doInBackground(String... strings) {
         try {
