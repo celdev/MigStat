@@ -51,7 +51,7 @@ public class SimpleWaitingTimeParser {
     *   3. extract the months-numbers
     *   4. use these to create a WaitingTime
     * */
-    public static WaitingTime parseDocumentGetDatesPart(String query, Document document, String beforeMonths, String beforeUpdatedAt, String afterMonths) throws ParserException {
+    private static WaitingTime parseDocumentGetDatesPart(String query, Document document, String beforeMonths, String beforeUpdatedAt, String afterMonths) throws ParserException {
         try {
             Element element = document.select(DIV_CLASS_CONTENT).first();
             element.child(0).remove();

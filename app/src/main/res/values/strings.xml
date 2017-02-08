@@ -120,5 +120,12 @@
 
     <string name="english">English</string>
     <string name="swedish">Svenska</string>
+    <string name="privacy_policy_menu">Privacy Policy</string>
+    <string name="ok_privacypolicy">You need to agree to the privacy policy to use this application.
+        \n\nThe privacy policy can be read here:
+        \nhttps://celdev.github.io/MigStat/
+    </string>
+    <string name="agree_to_pp">Agree</string>
+    <string name="enter_number">Enter your application number</string>
 
 </resources>

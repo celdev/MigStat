@@ -5,7 +5,8 @@
         android:id="@+id/menu_about"
         android:icon="@drawable/ic_help"
         app:showAsAction="always"/>
-
+    <item android:title="@string/privacy_policy_menu"
+        android:id="@+id/menu_privacy" />
     <item android:title="@string/menu_string_use_custom_waiting_time"
         android:id="@+id/menu_use_custom_waiting_time" />
     <item android:title="@string/menu_string_set_custom_waiting_time"

@@ -21,7 +21,7 @@ public class ServiceRunner extends Service implements ViewInterface{
 
     private ServiceThread serviceThread;
 
-    public static final long MS_BETWEEN_UPDATES = 30 * 60 * 1000;
+    public static final long MS_BETWEEN_UPDATES = 60 * 60 * 1000;
 
     public static final String TAG = MainActivity.LOG_KEY + ".Service";
 
@@ -116,11 +116,12 @@ public class ServiceRunner extends Service implements ViewInterface{
         public void run() {
             alive = true;
             long sleep = 0;
+            TimeZone timeZone = TimeZone.getTimeZone("Europe/Stockholm");
             while (alive) {
                 try {
                     sleep = ServiceTimeHelper.getMsToNextRequest();
                     Log.d(TAG, "sleeping service thread for " + sleep + " ms");
-                    Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Europe/Stockholm"));
+                    Calendar calendar = Calendar.getInstance(timeZone);
                     calendar.setTimeInMillis(System.currentTimeMillis() + sleep);
                     Log.d(TAG, "thread will stop sleep at " + calendar.toString());
                     Thread.sleep(sleep);

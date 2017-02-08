@@ -25,7 +25,7 @@ import org.jsoup.select.Elements;
 
 public class SimpleCaseStatusParser {
 
-    public static final String MIGRATIONSVERKET_MY_PAGE_URL = "http://www.migrationsverket.se/Kontakta-oss/Kontrollera-din-ansokan/Utan-inloggning.html?typenr=";
+    public static final String MIGRATIONSVERKET_MY_PAGE_URL = "https://www.migrationsverket.se/Kontakta-oss/Kontrollera-din-ansokan/Utan-inloggning.html?typenr=";
 
     public static final String DIV_CLASS_APPLICATIONDATE = ".sv-column-4 > p.normal";
     public static final String LIST_CLASS_STATUS = ".statusbar li";

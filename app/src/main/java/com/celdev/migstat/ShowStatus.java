@@ -543,6 +543,10 @@ public class ShowStatus extends AppCompatActivity implements ViewInterface {
                 controller.deleteAll();                         //the MainActivity
                 stopService(new Intent(this, ServiceRunner.class));
                 startActivity(new Intent(this, MainActivity.class));
+                return true;
+            case R.id.menu_privacy:
+                MainActivity.showPrivacyDocument(this);
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }

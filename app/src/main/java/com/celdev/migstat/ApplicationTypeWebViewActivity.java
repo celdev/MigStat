@@ -9,6 +9,7 @@ import android.support.annotation.RequiresApi;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -35,8 +36,8 @@ import com.celdev.migstat.view.ViewInterface;
 * */
 public class ApplicationTypeWebViewActivity extends AppCompatActivity implements ViewInterface {
 
-    public static final String SWEDISH_PAGE_URL = "http://www.migrationsverket.se/Kontakta-oss/Tid-till-beslut.html";
-    public static final String ENGLISH_PAGE_URL = "http://www.migrationsverket.se/English/Contact-us/Time-to-a-decision.html";
+    public static final String SWEDISH_PAGE_URL = "https://www.migrationsverket.se/Kontakta-oss/Tid-till-beslut.html";
+    public static final String ENGLISH_PAGE_URL = "https://www.migrationsverket.se/English/Contact-us/Time-to-a-decision.html";
 
     private ProgressDialog progressDialog;
     private String url;
@@ -178,6 +179,7 @@ public class ApplicationTypeWebViewActivity extends AppCompatActivity implements
             dismissProgressDialogAndShowWhatToDoDialog();
             if (!url.equals(ApplicationTypeWebViewActivity.this.url)) {
                 view.loadUrl(ApplicationTypeWebViewActivity.this.url);
+                Log.d("CustomWebView", "Tried to visist " + url);
                 showWrongLinkDialog();
             }
             super.onPageFinished(view, url);
@@ -238,6 +240,9 @@ public class ApplicationTypeWebViewActivity extends AppCompatActivity implements
         switch (item.getItemId()) {
             case R.id.menu_about:
                 showAboutDialog();
+                return true;
+            case R.id.menu_privacy:
+                MainActivity.showPrivacyDocument(this);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

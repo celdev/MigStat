@@ -39,7 +39,9 @@ public class DataStorage {
 
     private final static String VERSION_KEY = "APP_VERSION_KEY";
 
-    private static final long APP_VERSION = 4L;
+    private final static String PRIVACY_POLICY_HAVE_BEEN_SHOWN = "APP_HAS_SHOWN_PP";
+
+    private static final long APP_VERSION = 5L;
 
     private static final long THEME_ENABLE_TIME = 259200000L; //3 days
 
@@ -260,6 +262,20 @@ public class DataStorage {
         preferences.edit().remove(APP_ENABLE_THEMES).apply();
         Log.d(MainActivity.LOG_KEY, "themes was enabled more than 3 days ago");
         return false;
+    }
+
+    boolean privacyPolicyShowed(Context context){
+        SharedPreferences preferences = getSharedPreference(context);
+        return preferences.getBoolean(PRIVACY_POLICY_HAVE_BEEN_SHOWN, false);
+    }
+
+    void userOKPrivacyPolicy(Context context) {
+        SharedPreferences preferences = getSharedPreference(context);
+        try {
+            preferences.edit().putBoolean(PRIVACY_POLICY_HAVE_BEEN_SHOWN, true).apply();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 

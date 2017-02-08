@@ -1,9 +1,11 @@
 package com.celdev.migstat;
 
+import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -30,6 +32,7 @@ import com.celdev.migstat.model.ApplicationNumberType;
 import com.celdev.migstat.model.WaitingTime;
 import com.celdev.migstat.view.CustomAboutDialog;
 import com.celdev.migstat.view.CustomDatePickerDialog;
+import com.celdev.migstat.view.CustomPrivacyPolicyDialog;
 import com.celdev.migstat.view.CustomSetWaitingTimeDialog;
 import com.celdev.migstat.view.IntegerInputListener;
 import com.celdev.migstat.view.NumberPickerDialogReturn;
@@ -53,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
 
     public static final String APPLICATION_KEY = "com.celdev.migstat";
     public static final String WEBVIEWLANGUGAGE_INTENT = APPLICATION_KEY + ".WEB_VIEW_INTENT";
+    public static final String PRIVACY_POLICY_URL = "https://celdev.github.io/MigStat/";
 
     private RadioButton caseRadioButton, checkRadioButton;
     private EditText applicationNumberField;
@@ -85,6 +89,9 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
                 }
             }).create().show();
         }
+        if (!controller.privacyPolicyHaveBeenShown()) {
+            showPrivacyPolicy();
+        }
 
 
         initLayout();
@@ -96,6 +103,10 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
         initNumberField();
         initProgressDialog();
         checkState();
+    }
+
+    private void showPrivacyPolicy() {
+        new CustomPrivacyPolicyDialog(this,controller).createAndShow();
     }
 
     /*  sets up the OK-button functionality
@@ -457,9 +468,17 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
             case R.id.menu_about:
                 showAboutDialog();
                 return true;
+            case R.id.menu_privacy:
+                showPrivacyDocument(this);
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    public static void showPrivacyDocument(Activity activity) {
+        Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse(PRIVACY_POLICY_URL));
+        activity.startActivity(intent);
     }
 
     /*  creates and shows the about dialog */
@@ -471,10 +490,14 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
     *   locks the check button and shows a progress dialog
     * */
     private void doStatusCheck() {
-        checkStatusButton.setEnabled(false);
-        application = null;
-        progressDialog.show();
-        controller.checkApplicationNumberReturnApplication(Integer.parseInt(applicationNumberField.getText().toString()), getApplicationNumberType());
+        if (applicationNumberField.getText().toString().length() == 8) {
+            checkStatusButton.setEnabled(false);
+            application = null;
+            progressDialog.show();
+            controller.checkApplicationNumberReturnApplication(Integer.parseInt(applicationNumberField.getText().toString()), getApplicationNumberType());
+        } else {
+            Toast.makeText(this,R.string.enter_number,Toast.LENGTH_LONG).show();
+        }
     }
 
 

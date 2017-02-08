@@ -125,6 +125,14 @@ public class Controller implements DataStorageInterface {
         return application;
     }
 
+    public boolean privacyPolicyHaveBeenShown() {
+        return DataStorage.getInstance().privacyPolicyShowed(context);
+    }
+
+    public void userOKPrivacyPolicy() {
+        DataStorage.getInstance().userOKPrivacyPolicy(context);
+    }
+
     /*  This implementation of the AsyncCallback will handle the result from the
     *   check application Async Tasks
     *
